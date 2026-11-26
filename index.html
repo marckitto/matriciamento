@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matriciamento ACS × ACV — Atas e Pendências</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2e2b">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Matriciamento">
+<style>
+:root{
+  --bg:#f1f5f4; --sup:#ffffff; --tinta:#13201e; --mudo:#5b6b67; --linha:#dbe4e1; --linha2:#e9efed;
+  --mata:#0f2e2b; --mata2:#16403b; --acento:#0f2e2b; --foco:#2f8f7f;
+  --sombra:0 1px 2px rgba(15,46,43,.05),0 4px 14px rgba(15,46,43,.05);
+  --aberto:#ab4a00; --aberto-bg:#fff1e5;
+  --andamento:#0b68cb; --andamento-bg:#e9f3ff;
+  --aguardando:#7a3db3; --aguardando-bg:#f5eefc;
+  --resolvido:#18794e; --resolvido-bg:#e7f6ee;
+  --encerrado:#60646c; --encerrado-bg:#eff0f1;
+  --vencido:#ce2c31; --vencido-bg:#feebec;
+  --mono:ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",Menlo,monospace;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tinta);font:14px/1.45 var(--sans)}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mudo{color:var(--mudo)}
+.oculto{display:none!important}
+
+/* lateral */
+body{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+body > #faixa-demo{grid-column:1/-1}
+aside.lateral{position:sticky;top:0;height:100vh;background:var(--mata) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22316%22%20fill%3D%22none%22%20stroke%3D%22%239fd3c4%22%20stroke-opacity%3D%22.13%22%20stroke-width%3D%221%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2237%22%20y%3D%223%22%20width%3D%2220%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2263%22%20y%3D%223%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22127%22%20y%3D%223%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22191%22%20y%3D%223%22%20width%3D%2246%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2233%22%20width%3D%2246%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2255%22%20y%3D%2233%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2289%22%20y%3D%2233%22%20width%3D%2246%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22141%22%20y%3D%2233%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22205%22%20y%3D%2233%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2255%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22101%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22135%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22169%22%20y%3D%2255%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22233%22%20y%3D%2255%22%20width%3D%228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2299%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%2299%22%20width%3D%2234%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22107%22%20y%3D%2299%22%20width%3D%2274%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22187%22%20y%3D%2299%22%20width%3D%2220%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22213%22%20y%3D%2299%22%20width%3D%2224%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22143%22%20width%3D%2234%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2243%22%20y%3D%22143%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2295%22%20y%3D%22143%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22129%22%20y%3D%22143%22%20width%3D%2274%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22209%22%20y%3D%22143%22%20width%3D%2220%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22235%22%20y%3D%22143%22%20width%3D%228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22179%22%20width%3D%2274%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22147%22%20y%3D%22179%22%20width%3D%2220%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22173%22%20y%3D%22179%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22241%22%20y%3D%22179%22%20width%3D%228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22209%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%22209%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22107%22%20y%3D%22209%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22147%22%20y%3D%22209%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22211%22%20y%3D%22209%22%20width%3D%2220%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22237%22%20y%3D%22209%22%20width%3D%228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22231%22%20width%3D%2220%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2229%22%20y%3D%22231%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2269%22%20y%3D%22231%22%20width%3D%2274%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22149%22%20y%3D%22231%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22189%22%20y%3D%22231%22%20width%3D%2248%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22253%22%20width%3D%2234%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2243%22%20y%3D%22253%22%20width%3D%2220%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2269%22%20y%3D%22253%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22103%22%20y%3D%22253%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22137%22%20y%3D%22253%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22189%22%20y%3D%22253%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22241%22%20y%3D%22253%22%20width%3D%228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22289%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2237%22%20y%3D%22289%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22153%22%20y%3D%22289%22%20width%3D%2274%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22233%22%20y%3D%22289%22%20width%3D%228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3C/svg%3E") repeat;color:#e8f2ef;display:flex;flex-direction:column;padding:18px 12px;gap:18px;z-index:20;overflow-y:auto}
+.lateral .marca{padding:4px 10px 0}
+.lateral .marca b{display:block;font-family:var(--display);font-size:17px;font-weight:650;letter-spacing:-.01em;color:#fff;line-height:1.15}
+.lateral .marca span{display:block;font-size:11.5px;color:#9fc2b9;margin-top:4px}
+.lateral nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.lateral nav a{display:flex;align-items:center;gap:11px;text-decoration:none;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#c9ddd8;transition:background .15s,color .15s}
+.lateral nav a svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.lateral nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+.lateral nav a.ativo{background:#e8f2ef;color:var(--mata);font-weight:600}
+.lateral nav a.ativo svg{opacity:1}
+.lateral nav .badge{margin-left:auto;font-family:var(--mono);font-size:11px;background:var(--vencido);color:#fff;border-radius:999px;padding:0 7px;line-height:18px}
+.lateral .usuario{border-top:1px solid rgba(255,255,255,.12);padding:14px 8px 0;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.lateral .usuario #u-email{color:#fff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lateral .usuario .perfil{font-family:var(--mono);font-size:10.5px;color:#9fc2b9;letter-spacing:.04em}
+.lateral .usuario .bts{display:flex;gap:6px}
+.lateral button{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e8f2ef;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px}
+.lateral button:hover{background:rgba(255,255,255,.13)}
+body:has(#topo.oculto){display:block}
+
+main{width:100%;max-width:1280px;margin:0 auto;padding:28px 32px 48px;grid-column:2}
+h1{font-family:var(--display);font-size:26px;font-weight:650;letter-spacing:-.015em;margin:0 0 4px;line-height:1.15}
+h2{font-family:var(--display);font-size:16px;font-weight:620;margin:0;letter-spacing:-.005em}
+h3{font-size:14px;margin:0}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.cab p{margin:2px 0 0}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* botões */
+.btn{border:1px solid var(--linha);background:var(--sup);border-radius:9px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;transition:border-color .15s,background .15s,box-shadow .15s}
+.btn:hover{border-color:#aebdb8;box-shadow:0 1px 3px rgba(15,46,43,.08)}
+.btn.prim{background:var(--mata);border-color:var(--mata);color:#fff}
+.btn.prim:hover{background:var(--mata2)}
+.btn.perigo{color:var(--vencido);border-color:#f3c2c4}
+.btn.mini{padding:4px 10px;font-size:12px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:default}
+.lnk{background:none;border:0;padding:0;color:var(--tinta);text-decoration:underline;cursor:pointer;font-size:13px}
+
+/* blocos */
+.bloco{background:var(--sup);border:1px solid var(--linha);border-radius:14px;margin-bottom:18px;box-shadow:var(--sombra);overflow:hidden}
+.bloco > .tit{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 20px;border-bottom:1px solid var(--linha2);flex-wrap:wrap}
+.bloco > .tit p{margin:2px 0 0;font-size:12px}
+.bloco > .corpo{padding:16px 20px}
+.bloco > .corpo.sem{padding:0}
+.vazio{padding:20px;color:var(--mudo);font-size:13px}
+
+/* tabelas */
+.tab-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mudo);padding:10px 12px;border-bottom:1px solid var(--linha);white-space:nowrap;background:#f7faf9}
+table.t td{padding:11px 12px;border-bottom:1px solid var(--linha2);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t tr.clica{cursor:pointer}
+table.t tr.clica:hover td{background:#f3f8f6}
+table.t td.num,table.t th.num{text-align:right}
+table.t td.cod{font-family:var(--mono);font-size:12px;white-space:nowrap}
+table.t td.cod a{text-decoration:none;border-bottom:1px solid #b8cbc5}
+table.t td.acao{white-space:nowrap;text-align:right}
+table.t td{min-width:0}
+table.t td:has(> .sub){min-width:150px}
+table.t .sub{font-size:12px;color:var(--mudo)}
+
+/* situação */
+.sit{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 9px 2px 7px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.sit::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.sit-pendente::before{display:none}
+.sit-aberto{color:var(--aberto);background:var(--aberto-bg)}
+.sit-andamento{color:var(--andamento);background:var(--andamento-bg)}
+.sit-aguardando{color:var(--aguardando);background:var(--aguardando-bg)}
+.sit-resolvido{color:var(--resolvido);background:var(--resolvido-bg)}
+.sit-encerrado{color:var(--encerrado);background:var(--encerrado-bg)}
+.sit-pendente{color:var(--mudo);background:transparent;border:1px dashed #c4c6ca}
+.venc{color:var(--vencido);font-weight:600}
+.ok{color:var(--resolvido)}
+
+/* painel */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--sup);border:1px solid var(--linha);border-radius:14px;padding:16px 18px;box-shadow:var(--sombra)}
+.kpi .v{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.kpi .r{font-size:12.5px;color:var(--mudo);margin-top:4px}
+.kpi.alerta .v{color:var(--vencido)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.card{background:var(--sup);border:1px solid var(--linha);border-radius:14px;padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sombra);transition:transform .15s,box-shadow .15s,border-color .15s}
+.card:hover{border-color:#aebdb8;transform:translateY(-1px);box-shadow:0 2px 4px rgba(15,46,43,.06),0 10px 24px rgba(15,46,43,.08)}
+.card h3{font-family:var(--display);font-size:16px;font-weight:620}
+.card .sig{font-family:var(--mono);font-size:12px;color:var(--mudo)}
+.card .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.card .nums div{background:#f3f7f6;border-radius:9px;padding:8px 10px}
+.card .nums b{display:block;font-family:var(--mono);font-size:20px;font-weight:600}
+.card .nums span{font-size:11px;color:var(--mudo)}
+.card .nums .alerta b{color:var(--vencido)}
+.card .datas{font-size:12px;color:var(--mudo);display:flex;justify-content:space-between;gap:8px}
+
+/* filtros */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.filtros label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--mudo);text-transform:uppercase;letter-spacing:.3px}
+.filtros select,.filtros input[type=search]{min-width:150px}
+.filtros .chk{flex-direction:row;align-items:center;gap:6px;text-transform:none;font-size:13px;color:var(--tinta);padding-bottom:7px}
+
+input[type=text],input[type=email],input[type=password],input[type=date],input[type=search],input[type=number],select,textarea{
+  border:1px solid var(--linha);border-radius:9px;padding:8px 11px;background:#fff;width:100%;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--foco);box-shadow:0 0 0 3px rgba(47,143,127,.18)}
+:focus-visible{outline:2px solid var(--foco);outline-offset:2px}
+textarea{resize:vertical;min-height:64px}
+
+/* ata */
+.ata-cab{display:none}
+.ident{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 18px}
+.ident div span{display:block;font-size:11px;color:var(--mudo);text-transform:uppercase;letter-spacing:.3px}
+.ident div b{font-weight:500}
+.pend-aviso{font-size:12px;color:var(--aberto);font-weight:600}
+.assin{display:none}
+
+/* ponto */
+.linha-tempo{list-style:none;margin:0;padding:0}
+.linha-tempo li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--linha2)}
+.linha-tempo li:last-child{border-bottom:0}
+.linha-tempo .dt{font-family:var(--mono);font-size:12px;color:var(--mudo)}
+.linha-tempo .ev b{font-weight:600}
+.linha-tempo .ev p{margin:3px 0 0}
+
+/* modal */
+.fundo{position:fixed;inset:0;background:rgba(10,30,28,.42);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:40px 14px;z-index:50;overflow-y:auto}
+.modal{background:var(--sup);border-radius:18px;width:100%;max-width:620px;box-shadow:0 24px 60px rgba(10,30,28,.28);animation:surgir .18s ease-out}
+@keyframes surgir{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.modal .mt{padding:16px 22px;border-bottom:1px solid var(--linha2);display:flex;justify-content:space-between;align-items:center}
+.modal .mc{padding:18px 22px;display:grid;gap:12px}
+.modal .mr{padding:14px 22px;border-top:1px solid var(--linha2);display:flex;justify-content:flex-end;gap:8px}
+.modal .x{background:none;border:0;font-size:20px;cursor:pointer;color:var(--mudo);line-height:1}
+.campo{display:flex;flex-direction:column;gap:4px}
+.campo > span{font-size:12px;color:var(--mudo)}
+.campo small{font-size:11px;color:var(--mudo)}
+.grade2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grade3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.erro{background:var(--vencido-bg);color:var(--vencido);padding:8px 10px;border-radius:6px;font-size:13px}
+.info{background:#f1f3f5;padding:8px 10px;border-radius:6px;font-size:13px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--linha2);border-left:1px solid var(--linha2)}
+.cal .dsem{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--mudo);padding:6px 8px;border-right:1px solid var(--linha2);border-bottom:1px solid var(--linha2);background:#fafbfb}
+.cal .dia{min-height:96px;padding:4px 5px;border-right:1px solid var(--linha2);border-bottom:1px solid var(--linha2);cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal .dia:hover{background:#f8f9fa}
+.cal .dia.fora{background:#fbfbfc;color:#b0b3b8}
+.cal .dia.sel{box-shadow:inset 0 0 0 2px var(--tinta)}
+.cal .dia .n{font-family:var(--mono);font-size:12px}
+.cal .dia.hoje .n{background:var(--tinta);color:#fff;border-radius:999px;padding:0 6px;align-self:flex-start}
+.ev{font-size:11px;line-height:1.25;padding:1px 5px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid}
+.ev-reuniao{background:#eff0f1;border-color:#8b8d98;color:#3a3d42}
+.ev-agendada{background:var(--andamento-bg);border-color:var(--andamento);color:#0b4f99}
+.ev-acao{background:var(--aguardando-bg);border-color:var(--aguardando);color:#5e2d8c}
+.ev-prazo{background:var(--aberto-bg);border-color:var(--aberto);color:#7a3500}
+.ev-vencido{background:var(--vencido-bg);border-color:var(--vencido);color:#a1161b}
+.ev-feito{background:var(--resolvido-bg);border-color:var(--resolvido);color:#11603d}
+.ev-revisao{background:#fff;border-color:#c4c6ca;color:var(--mudo);border-style:dashed}
+.ev-cancelada{text-decoration:line-through;opacity:.6}
+.ev .mais{color:var(--mudo)}
+.legenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mudo);padding:10px 16px}
+.legenda .ev{display:inline-block}
+.lista-ev{list-style:none;margin:0;padding:0}
+.lista-ev li{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:start;padding:9px 16px;border-bottom:1px solid var(--linha2)}
+.lista-ev li:last-child{border-bottom:0}
+.lista-ev .dt{font-family:var(--mono);font-size:12px;color:var(--mudo)}
+@media (max-width:640px){ .cal .dia{min-height:58px} .cal .ev{font-size:0;height:5px;padding:0;border:0;background:currentColor!important;border-radius:3px} .lista-ev li{grid-template-columns:80px 1fr} .lista-ev li > :last-child{grid-column:1/3} }
+.pres-grupo{border:1px solid var(--linha2);border-radius:8px;padding:8px 10px}
+.pres-grupo .pg-tit{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;font-weight:600}
+.pres-grupo .pg-tit span{display:flex;gap:6px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}
+.chip{display:flex;align-items:flex-start;gap:7px;border:1px solid var(--linha);border-radius:7px;padding:6px 8px;cursor:pointer;user-select:none;font-size:13px;line-height:1.25;background:#fff}
+.chip input{margin:2px 0 0;width:auto;accent-color:var(--tinta)}
+.chip small{display:block;color:var(--mudo);font-size:11px;font-family:var(--mono)}
+.chip:has(input:checked){border-color:var(--tinta);background:#f1f3f5;box-shadow:inset 0 0 0 1px var(--tinta)}
+.pres-cont{font-family:var(--mono);font-size:12px;color:var(--mudo)}
+.voz-caixa{position:relative;display:block}
+.voz-caixa > input{padding-right:38px}
+.voz-caixa > textarea{padding-right:40px}
+.voz-bt{position:absolute;right:6px;top:6px;width:28px;height:28px;border-radius:8px;border:1px solid var(--linha);background:#f3f7f6;color:var(--mudo);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.voz-caixa > input + .voz-bt{top:50%;transform:translateY(-50%)}
+.voz-bt svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.voz-bt:hover{color:var(--mata);border-color:#aebdb8}
+.voz-caixa.ouvindo > textarea,.voz-caixa.ouvindo > input{border-color:var(--vencido);box-shadow:0 0 0 3px rgba(206,44,49,.15)}
+.voz-caixa.ouvindo .voz-bt{background:var(--vencido);border-color:var(--vencido);color:#fff;animation:pulsar 1.2s ease-in-out infinite}
+@keyframes pulsar{0%,100%{box-shadow:0 0 0 0 rgba(206,44,49,.45)}50%{box-shadow:0 0 0 6px rgba(206,44,49,0)}}
+.part-linha{display:grid;grid-template-columns:2fr 1.4fr 1fr auto 28px;gap:6px;align-items:center}
+.part-linha .cad{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mudo);white-space:nowrap;cursor:pointer}
+.part-linha .cad input{width:auto;margin:0}
+.part-linha button{border:0;background:none;color:var(--mudo);cursor:pointer;font-size:16px}
+
+/* login */
+.login{max-width:400px;margin:9vh auto;background:var(--sup);border:1px solid var(--linha);border-radius:18px;padding:30px;box-shadow:var(--sombra)}
+body:has(#topo.oculto){background:var(--mata) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22316%22%20fill%3D%22none%22%20stroke%3D%22%239fd3c4%22%20stroke-opacity%3D%22.13%22%20stroke-width%3D%221%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2237%22%20y%3D%223%22%20width%3D%2220%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2263%22%20y%3D%223%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22127%22%20y%3D%223%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22191%22%20y%3D%223%22%20width%3D%2246%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2233%22%20width%3D%2246%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2255%22%20y%3D%2233%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2289%22%20y%3D%2233%22%20width%3D%2246%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22141%22%20y%3D%2233%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22205%22%20y%3D%2233%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2255%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22101%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22135%22%20y%3D%2255%22%20width%3D%2228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22169%22%20y%3D%2255%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22233%22%20y%3D%2255%22%20width%3D%228%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%2299%22%20width%3D%2258%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%2299%22%20width%3D%2234%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22107%22%20y%3D%2299%22%20width%3D%2274%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22187%22%20y%3D%2299%22%20width%3D%2220%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22213%22%20y%3D%2299%22%20width%3D%2224%22%20height%3D%2238%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22143%22%20width%3D%2234%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2243%22%20y%3D%22143%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2295%22%20y%3D%22143%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22129%22%20y%3D%22143%22%20width%3D%2274%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22209%22%20y%3D%22143%22%20width%3D%2220%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22235%22%20y%3D%22143%22%20width%3D%228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22179%22%20width%3D%2274%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22147%22%20y%3D%22179%22%20width%3D%2220%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22173%22%20y%3D%22179%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22241%22%20y%3D%22179%22%20width%3D%228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22209%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2267%22%20y%3D%22209%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22107%22%20y%3D%22209%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22147%22%20y%3D%22209%22%20width%3D%2258%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22211%22%20y%3D%22209%22%20width%3D%2220%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22237%22%20y%3D%22209%22%20width%3D%228%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22231%22%20width%3D%2220%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2229%22%20y%3D%22231%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2269%22%20y%3D%22231%22%20width%3D%2274%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22149%22%20y%3D%22231%22%20width%3D%2234%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22189%22%20y%3D%22231%22%20width%3D%2248%22%20height%3D%2216%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22253%22%20width%3D%2234%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2243%22%20y%3D%22253%22%20width%3D%2220%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2269%22%20y%3D%22253%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22103%22%20y%3D%22253%22%20width%3D%2228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22137%22%20y%3D%22253%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22189%22%20y%3D%22253%22%20width%3D%2246%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22241%22%20y%3D%22253%22%20width%3D%228%22%20height%3D%2230%22%20rx%3D%222%22/%3E%3Crect%20x%3D%223%22%20y%3D%22289%22%20width%3D%2228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2237%22%20y%3D%22289%22%20width%3D%2258%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22153%22%20y%3D%22289%22%20width%3D%2274%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22233%22%20y%3D%22289%22%20width%3D%228%22%20height%3D%2224%22%20rx%3D%222%22/%3E%3C/svg%3E") repeat}
+body:has(#topo.oculto) main{max-width:none}
+.login h1{font-size:18px}
+.login form{display:grid;gap:12px;margin-top:16px}
+.login .alt{display:flex;justify-content:space-between;margin-top:14px;font-size:13px}
+
+.aviso-top{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--mata);border-radius:10px!important;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.aviso-top.erro{background:var(--vencido)}
+.carregando{padding:40px;text-align:center;color:var(--mudo)}
+main > *{animation:entrar .22s ease-out both}
+@keyframes entrar{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.serie{display:flex;flex-direction:column;gap:4px}
+.serie .barras{display:flex;align-items:flex-end;gap:4px;height:38px}
+.serie .barras i{flex:1;background:#c6d9d3;border-radius:3px 3px 1px 1px;min-height:2px}
+.serie .barras i.ult{background:var(--mata)}
+.serie .meses{display:flex;gap:4px;font-family:var(--mono);font-size:10px;color:var(--mudo)}
+.serie .meses span{flex:1;text-align:center}
+.serie .meses.vals{color:var(--tinta);font-size:11px;font-weight:600;margin-top:2px}
+.serie .leg{font-size:11px;color:var(--mudo);display:flex;justify-content:space-between}
+
+@media (max-width:900px){
+  body{display:block}
+  aside.lateral{position:sticky;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px}
+  .lateral .marca{padding:0 4px;flex:1}
+  .lateral .marca span{display:none}
+  .lateral nav{order:3;flex-direction:row;overflow-x:auto;flex-basis:100%;gap:4px;scrollbar-width:none}
+  .lateral nav a{padding:7px 10px;white-space:nowrap;font-size:13px}
+  .lateral nav a svg{width:16px;height:16px}
+  .lateral .usuario{border:0;padding:0;flex-direction:row;align-items:center}
+  .lateral .usuario #u-email,.lateral .usuario .perfil{display:none}
+  main{padding:20px 16px 40px}
+}
+@media (max-width:640px){
+  main{padding:16px 14px 40px}
+  h1{font-size:22px}
+  .grade2,.grade3{grid-template-columns:1fr}
+  .ident{grid-template-columns:1fr 1fr}
+  .topo .marca span{display:none}
+  .part-linha{grid-template-columns:1fr 1fr}
+  .part-linha > *:nth-child(3){grid-column:1/3}
+}
+
+/* impressão da ata */
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  html,body{background:#fff;font-size:11px}
+  body{display:block!important;background:#fff!important}
+  aside.lateral,header.topo,.nao-imprime,.btn,.lnk,td.acao,th.acao,.aviso-top,.fundo{display:none!important}
+  main{padding:0;max-width:none}
+  .bloco{border:0;border-radius:0;margin-bottom:10px;break-inside:auto;box-shadow:none}
+  main > *{animation:none!important}
+  .bloco > .tit{padding:6px 0;border-bottom:1.5px solid #000}
+  .bloco > .corpo{padding:8px 0}
+  table.t th{background:none;color:#000;border-bottom:1px solid #000;padding:4px 5px;font-size:9.5px}
+  table.t td{padding:4px 5px;border-bottom:1px solid #bbb}
+  table.t tr{break-inside:avoid}
+  .sit{border:1px solid #888;background:none!important;color:#000!important;padding:0 5px}
+  .ata-cab{display:block;text-align:center;margin-bottom:10px;border-bottom:2px solid #000;padding-bottom:6px}
+  .ata-cab b{display:block;font-size:13px}
+  .ata-cab span{font-size:10px}
+  .cab{margin-bottom:6px}
+  .assin{display:grid;grid-template-columns:1fr 1fr;gap:28px 30px;margin-top:26px}
+  .assin div{border-top:1px solid #000;padding-top:3px;font-size:10px;text-align:center}
+  .pend-aviso{display:none}
+}
+</style>
+</head>
+<body>
+<aside class="lateral oculto" id="topo">
+  <div class="marca"><b>Matriciamento<br>ACS × ACV</b><span>Controle de Vetores · Paulínia</span></div>
+  <nav id="nav"></nav>
+  <div class="usuario"><span id="u-email"></span><span class="perfil" id="u-perfil"></span>
+    <div class="bts"><button id="b-atualizar" title="Recarregar dados">Atualizar</button><button id="b-sair">Sair</button></div></div>
+</aside>
+<main id="app"><div class="carregando">Carregando…</div></main>
+
+<script>
+'use strict';
+/* ================= Configuração ================= */
+const SB_URL = 'https://psyfcwpupjsxpfgienxr.supabase.co';
+const SB_KEY = 'sb_publishable_CgP-HRMOaw3CUAK1LfeJng_pRJaAn4e';
+const SITUACOES = ['Aberto','Em andamento','Aguardando outro setor','Resolvido','Encerrado sem solução'];
+const FECHADAS = new Set(['Resolvido','Encerrado sem solução']);
+const SIT_CLASSE = {'Aberto':'aberto','Em andamento':'andamento','Aguardando outro setor':'aguardando','Resolvido':'resolvido','Encerrado sem solução':'encerrado'};
+const TIPOS = ['Criadouro recorrente','Imóvel fechado','Recusa','Acumulador','Terreno baldio',"Piscina ou caixa d'água",'Ponto estratégico','Área com caso notificado','Outro'];
+const FUNCOES = ['ACS','ACV','Enfermeiro(a) da UBS','Supervisor(a) da UBS','Supervisor(a) de controle de vetores','Outro'];
+
+/* ================= Utilidades ================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const loja = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+function hoje(){ const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function fmt(d){ if(!d) return '—'; const [a,m,dd]=String(d).slice(0,10).split('-'); return `${dd}/${m}/${a}`; }
+function dias(de, ate){ return Math.round((new Date(ate+'T12:00:00') - new Date(de+'T12:00:00'))/86400000); }
+function sit(s){ return `<span class="sit sit-${SIT_CLASSE[s]||'encerrado'}">${esc(s)}</span>`; }
+function aviso(msg, erro){
+  document.querySelectorAll('.aviso-top').forEach(x=>x.remove());
+  const el=document.createElement('div'); el.className='aviso-top'+(erro?' erro':''); el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(), erro?5000:2600);
+}
+function opts(lista, atual, vazio){
+  return (vazio!==undefined?`<option value="">${esc(vazio)}</option>`:'') +
+    lista.map(o => { const v = typeof o==='object'?o.v:o, t = typeof o==='object'?o.t:o;
+      return `<option value="${esc(v)}" ${String(v)===String(atual??'')?'selected':''}>${esc(t)}</option>`; }).join('');
+}
+
+/* ================= Autenticação (Supabase Auth via fetch) ================= */
+const SESSAO_CHAVE = window.MATRIC_DEMO ? 'matric_demo_sessao' : 'matric_sessao';
+let sessao = loja.get(SESSAO_CHAVE);
+let perfil = null;
+
+function traduzAuth(j){
+  const m = (j && (j.msg || j.error_description || j.message || j.error)) || '';
+  if(/invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if(/email not confirmed/i.test(m)) return 'E-mail ainda não confirmado. Abra o link de confirmação enviado para o seu e-mail.';
+  if(/already registered|already been registered/i.test(m)) return 'Este e-mail já tem conta. Use "Entrar" ou "Esqueci a senha".';
+  if(/password.*(at least|characters)/i.test(m)) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if(/rate limit|too many/i.test(m)) return 'Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.';
+  return m;
+}
+async function authReq(caminho, corpo, metodo='POST'){
+  const h = {apikey:SB_KEY, 'Content-Type':'application/json'};
+  if(sessao && sessao.access_token && (caminho==='user' || caminho==='logout')) h.Authorization = 'Bearer '+sessao.access_token;
+  const r = await fetch(SB_URL+'/auth/v1/'+caminho, {method:metodo, headers:h, body: metodo==='GET'?undefined:JSON.stringify(corpo||{})});
+  const t = await r.text(); let j=null; try{ j = t?JSON.parse(t):null; }catch(e){}
+  if(!r.ok) throw new Error(traduzAuth(j) || ('Erro '+r.status));
+  return j;
+}
+function guardarSessao(j){
+  sessao = {
+    access_token: j.access_token, refresh_token: j.refresh_token,
+    expires_at: j.expires_at || Math.floor(Date.now()/1000) + Number(j.expires_in||3600),
+    email: (j.user && j.user.email) || (sessao && sessao.email) || ''
+  };
+  loja.set(SESSAO_CHAVE, sessao);
+}
+async function renovar(){
+  if(!sessao || !sessao.refresh_token) throw new Error('SESSAO');
+  try { guardarSessao(await authReq('token?grant_type=refresh_token', {refresh_token: sessao.refresh_token})); }
+  catch(e){ sair(true); throw new Error('SESSAO'); }
+}
+async function tokenValido(){
+  if(!sessao) throw new Error('SESSAO');
+  if((sessao.expires_at||0) - 60 < Date.now()/1000) await renovar();
+  return sessao.access_token;
+}
+function redirecionar(){ return /^https?:/.test(location.protocol) ? location.href.split('#')[0] : null; }
+function sair(silencioso){
+  if(sessao && !silencioso) authReq('logout', {}).catch(()=>{});
+  sessao = null; perfil = null; loja.del(SESSAO_CHAVE);
+  $('#topo').classList.add('oculto');
+  telaLogin(silencioso ? 'Sua sessão expirou. Entre novamente.' : '');
+}
+
+/* ================= API REST ================= */
+function traduzApi(j, status){
+  const code = j && j.code, msg = (j && (j.message || j.msg)) || '';
+  if(code==='23505'){
+    if(/matric_reunioes_ubs_id_data/.test(msg)) return 'Já existe reunião desta UBS nesta data.';
+    if(/matric_ubs_sigla/.test(msg)) return 'Já existe UBS com esta sigla.';
+    if(/matric_acesso_pkey/.test(msg)) return 'Este e-mail já está na lista de acesso.';
+    return 'Registro duplicado.';
+  }
+  if(code==='23503') return 'Não é possível excluir: há registros ligados a este item (pontos, atualizações ou encaminhamentos).';
+  if(code==='23514' && /sigla/.test(msg)) return 'Sigla inválida: use de 2 a 10 letras maiúsculas ou números, sem espaço.';
+  if(code==='42501' || status===403) return 'Sem permissão para esta ação. Só quem tem acesso de edição pode alterar.';
+  return msg || ('Erro '+status);
+}
+async function api(metodo, caminho, corpo, prefer, extraHeaders){
+  let renovou = false;
+  for(;;){
+    const h = {apikey:SB_KEY, Authorization:'Bearer '+await tokenValido(), 'Content-Type':'application/json', ...(extraHeaders||{})};
+    if(prefer) h.Prefer = prefer;
+    const r = await fetch(SB_URL+'/rest/v1/'+caminho, {method:metodo, headers:h, body: corpo===undefined?undefined:JSON.stringify(corpo)});
+    if(r.status===401 && !renovou){ renovou = true; await renovar(); continue; }
+    const t = await r.text(); let j=null; try{ j = t?JSON.parse(t):null; }catch(e){}
+    if(!r.ok) throw new Error(traduzApi(j, r.status));
+    return j;
+  }
+}
+async function todos(tabela, query){
+  const lote = 1000; let ini = 0, saida = [];
+  for(;;){
+    const parte = await api('GET', `${tabela}?${query}`, undefined, null, {'Range-Unit':'items', Range:`${ini}-${ini+lote-1}`});
+    saida = saida.concat(parte||[]);
+    if(!parte || parte.length < lote) return saida;
+    ini += lote;
+  }
+}
+const inserir = (t,linha) => api('POST', t, linha, 'return=representation');
+async function alterar(t, id, linha, col='id'){
+  const r = await api('PATCH', `${t}?${col}=eq.${encodeURIComponent(id)}`, linha, 'return=representation');
+  if(!r || !r.length) throw new Error('Sem permissão para esta ação. Só quem tem acesso de edição pode alterar.');
+  return r;
+}
+async function excluir(t, id, col='id'){
+  const r = await api('DELETE', `${t}?${col}=eq.${encodeURIComponent(id)}`, undefined, 'return=representation');
+  if(!r || !r.length) throw new Error('Sem permissão para excluir.');
+  return r;
+}
+const gravarOuAtualizar = (t, linha, conflito) => api('POST', `${t}?on_conflict=${conflito}`, linha, 'resolution=merge-duplicates,return=representation');
+
+/* ================= Dados ================= */
+const D = {ubs:[], reunioes:[], pontos:[], atual:[], enc:[], acesso:[], agentes:[], pact:[], agenda:[]};
+const IX = {agente:new Map(), ubs:new Map(), reun:new Map(), ponto:new Map(), atualPonto:new Map(), atualChave:new Map(), encPonto:new Map()};
+const F = {ubs:'', pSit:'abertos', pTipo:'', pBusca:'', eConc:false, eBusca:'', aUbs:'', aFun:'', aIn:false, gMes:'', gDia:'', gUbs:'', gTipos:{reuniao:true, acao:true, prazo:true, revisao:true}, kUbs:'', kSit:'ativas', kBusca:''};
+
+async function carregar(){
+  const [u,r,p,a,e,g,k,ag] = await Promise.all([
+    todos('matric_ubs','select=*&order=sigla'),
+    todos('matric_reunioes','select=*&order=data.desc'),
+    todos('matric_pontos','select=*&order=codigo'),
+    todos('matric_atualizacoes','select=*'),
+    todos('matric_encaminhamentos','select=*&order=prazo.asc.nullslast'),
+    todos('matric_agentes','select=*&order=nome'),
+    todos('matric_pactuacoes','select=*&order=data.desc'),
+    todos('matric_agenda','select=*&order=data')
+  ]);
+  Object.assign(D, {ubs:u, reunioes:r, pontos:p, atual:a, enc:e, agentes:g, pact:k, agenda:ag});
+  if(perfil && perfil.admin) D.acesso = await todos('matric_acesso','select=*&order=nome');
+  indexar();
+}
+function indexar(){
+  D.reunioes.sort((a,b)=>b.data.localeCompare(a.data));
+  D.pontos.sort((a,b)=>a.codigo.localeCompare(b.codigo));
+  IX.ubs = new Map(D.ubs.map(x=>[x.id,x]));
+  IX.agente = new Map(D.agentes.map(x=>[x.id,x]));
+  IX.reun = new Map(D.reunioes.map(x=>[x.id,x]));
+  IX.ponto = new Map(D.pontos.map(x=>[x.id,x]));
+  IX.atualPonto = new Map(); IX.atualChave = new Map(); IX.encPonto = new Map();
+  for(const a of D.atual){
+    if(!IX.atualPonto.has(a.ponto_id)) IX.atualPonto.set(a.ponto_id, []);
+    IX.atualPonto.get(a.ponto_id).push(a);
+    IX.atualChave.set(a.ponto_id+'|'+a.reuniao_id, a);
+  }
+  for(const e of D.enc){
+    if(!IX.encPonto.has(e.ponto_id)) IX.encPonto.set(e.ponto_id, []);
+    IX.encPonto.get(e.ponto_id).push(e);
+  }
+}
+const ubsNome = id => { const u = IX.ubs.get(id); return u ? u.nome : '—'; };
+const ubsSigla = id => { const u = IX.ubs.get(id); return u ? u.sigla : '—'; };
+const dataReun = id => { const r = IX.reun.get(id); return r ? r.data : null; };
+const atualDe = (pontoId, reunId) => IX.atualChave.get(pontoId+'|'+reunId);
+function situacaoAntes(p, data){
+  let melhor = null;
+  for(const a of IX.atualPonto.get(p.id)||[]){
+    const d = dataReun(a.reuniao_id);
+    if(d && d < data && (!melhor || d > melhor.d)) melhor = {a, d};
+  }
+  return melhor ? melhor.a.situacao : 'Aberto';
+}
+function situacaoNa(p, R){ // situação do ponto ao fim da reunião R
+  const a = atualDe(p.id, R.id);
+  return a ? a.situacao : (p.reuniao_origem===R.id ? 'Aberto' : situacaoAntes(p, R.data));
+}
+function parteA(R){
+  return D.pontos.filter(p => {
+    if(p.ubs_id !== R.ubs_id) return false;
+    const dOrig = dataReun(p.reuniao_origem);
+    if(!dOrig || dOrig >= R.data) return false;
+    return !!atualDe(p.id, R.id) || !FECHADAS.has(situacaoAntes(p, R.data));
+  }).sort((a,b)=>a.codigo.localeCompare(b.codigo));
+}
+const parteB = R => D.pontos.filter(p => p.reuniao_origem === R.id).sort((a,b)=>a.codigo.localeCompare(b.codigo));
+const parteC = R => D.enc.filter(e => e.reuniao_id === R.id).sort((a,b)=>(IX.ponto.get(a.ponto_id)?.codigo||'').localeCompare(IX.ponto.get(b.ponto_id)?.codigo||'') || (a.criado_em||'').localeCompare(b.criado_em||''));
+function encAnteriores(p, data){
+  return (IX.encPonto.get(p.id)||[]).filter(e => { const d = dataReun(e.reuniao_id); return d && d < data; })
+    .sort((a,b)=>(dataReun(a.reuniao_id)||'').localeCompare(dataReun(b.reuniao_id)||''));
+}
+const vencido = e => !e.concluido && e.prazo && e.prazo < hoje();
+const abertos = () => D.pontos.filter(p => !FECHADAS.has(p.situacao));
+
+/* ================= Login ================= */
+function telaLogin(msg, modo='entrar'){
+  $('#topo').classList.add('oculto');
+  const titulos = {entrar:'Entrar', criar:'Primeiro acesso', esqueci:'Recuperar senha'};
+  $('#app').innerHTML = `
+  <div class="login">
+    <h1>Atas de Matriciamento ACS × ACV</h1>
+    <p class="mudo" style="margin:4px 0 0">Vigilância em Saúde · Controle de Vetores · Paulínia</p>
+    <form id="f-login">
+      <h3>${titulos[modo]}</h3>
+      ${msg?`<div class="${/enviad|criada|confirm/i.test(msg)&&!/não/i.test(msg)?'info':'erro'}">${esc(msg)}</div>`:''}
+      <label class="campo"><span>E-mail</span><input type="email" name="email" required autocomplete="email" value="${esc(loja.get('matric_ultimo_email')||'')}"></label>
+      ${modo!=='esqueci'?`<label class="campo"><span>Senha</span><input type="password" name="senha" required minlength="6" autocomplete="${modo==='criar'?'new-password':'current-password'}"></label>`:''}
+      ${modo==='criar'?`<label class="campo"><span>Repita a senha</span><input type="password" name="senha2" required minlength="6" autocomplete="new-password"></label>`:''}
+      <button class="btn prim" type="submit">${modo==='entrar'?'Entrar':modo==='criar'?'Criar acesso':'Enviar link de recuperação'}</button>
+      ${modo==='entrar'?'<p class="mudo" style="margin:0;font-size:12px">Quem já usa o painel de dengue entra com o mesmo e-mail e senha.</p>':''}
+    </form>
+    <div class="alt">
+      ${modo!=='entrar'?'<button class="lnk" data-m="entrar">Voltar para entrar</button>':'<button class="lnk" data-m="criar">Primeiro acesso</button>'}
+      ${modo==='entrar'?'<button class="lnk" data-m="esqueci">Esqueci a senha</button>':''}
+    </div>
+  </div>`;
+  document.querySelectorAll('.alt [data-m]').forEach(b => b.onclick = () => telaLogin('', b.dataset.m));
+  $('#f-login').onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.target, email = f.email.value.trim().toLowerCase(), bt = f.querySelector('button[type=submit]');
+    loja.set('matric_ultimo_email', email);
+    bt.disabled = true;
+    try{
+      if(modo==='entrar'){
+        guardarSessao(await authReq('token?grant_type=password', {email, password:f.senha.value}));
+        await iniciar();
+      } else if(modo==='criar'){
+        if(f.senha.value !== f.senha2.value) throw new Error('As senhas não conferem.');
+        const red = redirecionar();
+        const j = await authReq('signup'+(red?'?redirect_to='+encodeURIComponent(red):''), {email, password:f.senha.value});
+        if(j && j.access_token){ guardarSessao(j); await iniciar(); }
+        else telaLogin('Conta criada. Abra o link de confirmação enviado para '+email+' e depois volte aqui para entrar.', 'entrar');
+      } else {
+        const red = redirecionar();
+        await authReq('recover'+(red?'?redirect_to='+encodeURIComponent(red):''), {email});
+        telaLogin('Se o e-mail tiver conta, um link de recuperação foi enviado para '+email+'.', 'entrar');
+      }
+    }catch(e){ telaLogin(e.message, modo); }
+  };
+}
+async function trocarSenha(){
+  modal('Definir nova senha', `
+    <label class="campo"><span>Nova senha</span><input type="password" name="s1" minlength="6" required></label>
+    <label class="campo"><span>Repita a nova senha</span><input type="password" name="s2" minlength="6" required></label>`,
+    async f => {
+      if(f.s1.value.length < 6) throw new Error('A senha precisa ter pelo menos 6 caracteres.');
+      if(f.s1.value !== f.s2.value) throw new Error('As senhas não conferem.');
+      await tokenValido();
+      await authReq('user', {password:f.s1.value}, 'PUT');
+      aviso('Senha alterada.');
+    });
+}
+
+/* ================= Início ================= */
+async function lerRetornoEmail(){
+  if(!/access_token=/.test(location.hash)) return null;
+  const q = new URLSearchParams(location.hash.slice(1));
+  guardarSessao({access_token:q.get('access_token'), refresh_token:q.get('refresh_token'), expires_in:q.get('expires_in')});
+  try{ const u = await authReq('user', null, 'GET'); sessao.email = u.email; loja.set(SESSAO_CHAVE, sessao); }catch(e){}
+  history.replaceState(null, '', location.pathname + location.search + '#/');
+  return q.get('type');
+}
+async function iniciar(){
+  const tipo = await lerRetornoEmail();
+  if(!sessao) return telaLogin('');
+  $('#app').innerHTML = '<div class="carregando">Carregando dados…</div>';
+  try{
+    perfil = await api('POST', 'rpc/matric_perfil', {});
+    if(!perfil || !perfil.le){
+      $('#topo').classList.add('oculto');
+      $('#app').innerHTML = `<div class="login"><h1>Acesso ainda não liberado</h1>
+        <p>Você entrou como <b>${esc(sessao.email)}</b>, mas este e-mail ainda não está na lista de acesso das atas de matriciamento.</p>
+        <p class="mudo">Peça ao administrador da Divisão de Controle de Vetores para incluir seu e-mail. Depois, toque em "Tentar de novo".</p>
+        <div class="acoes"><button class="btn prim" id="b-tentar">Tentar de novo</button><button class="btn" id="b-sair2">Sair</button></div></div>`;
+      $('#b-tentar').onclick = iniciar; $('#b-sair2').onclick = () => sair();
+      return;
+    }
+    await carregar();
+  }catch(e){
+    if(e.message==='SESSAO') return;
+    $('#app').innerHTML = `<div class="login"><h1>Não foi possível carregar</h1><div class="erro">${esc(e.message)}</div>
+      <p class="mudo">Verifique a internet. Se o problema continuar, o projeto do Supabase pode estar pausado por inatividade e precisa ser reativado pelo administrador.</p>
+      <div class="acoes"><button class="btn prim" id="b-tentar">Tentar de novo</button><button class="btn" id="b-sair2">Sair</button></div></div>`;
+    $('#b-tentar').onclick = iniciar; $('#b-sair2').onclick = () => sair();
+    return;
+  }
+  $('#topo').classList.remove('oculto');
+  $('#u-email').textContent = perfil.nome || sessao.email;
+  $('#u-perfil').textContent = perfil.admin ? 'ADMIN' : perfil.edita ? 'EDIÇÃO' : 'CONSULTA' + (D.ubs.length ? ' · ' + D.ubs.map(u=>u.sigla).join(', ') : '');
+  if(tipo==='recovery') trocarSenha();
+  render();
+}
+async function recarregar(msg){
+  try{ await carregar(); render(); if(msg) aviso(msg); }
+  catch(e){ if(e.message!=='SESSAO') aviso(e.message, true); }
+}
+$('#b-sair').onclick = () => sair();
+$('#b-atualizar').onclick = () => recarregar('Dados atualizados.');
+
+/* ================= Navegação ================= */
+const ICONES = {
+  painel:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  agenda:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  reunioes:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
+  pontos:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  encaminhamentos:'<svg viewBox="0 0 24 24"><path d="M4 7h11M4 12h7M4 17h9"/><path d="M15 14l3 3 4-5"/></svg>',
+  pactuacoes:'<svg viewBox="0 0 24 24"><path d="M7 4h7l4 4v12H7z"/><path d="M14 4v4h4M10 13l2 2 3-4"/></svg>',
+  admin:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>'
+};
+function rota(){ const p = (location.hash.slice(1)||'/').split('/').filter(Boolean); return {pag:p[0]||'painel', id:p[1]}; }
+function render(){
+  if(!perfil) return;
+  const {pag, id} = rota();
+  const links = [['painel','Painel'],['agenda','Agenda'],['reunioes','Reuniões'],['pontos','Pontos'],['encaminhamentos','Encaminhamentos'],['pactuacoes','Pactuações']];
+  if(perfil.admin) links.push(['admin','Administração']);
+  const ativo = {reuniao:'reunioes', ponto:'pontos'}[pag] || pag;
+  const nVenc = D.enc.filter(vencido).length;
+  $('#nav').innerHTML = links.map(([k,t]) => `<a href="#/${k}" class="${k===ativo?'ativo':''}">${ICONES[k]||''}<span>${t}</span>${k==='encaminhamentos'&&nVenc?`<span class="badge" title="encaminhamentos vencidos">${nVenc}</span>`:''}</a>`).join('');
+  const telas = {painel:telaPainel, agenda:telaAgenda, reunioes:telaReunioes, reuniao:telaReuniao, pontos:telaPontos, ponto:telaPonto, encaminhamentos:telaEncaminhamentos, pactuacoes:telaPactuacoes, admin:telaAdmin};
+  (telas[pag] || telaPainel)(id);
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', render);
+
+/* ================= Modal ================= */
+function modal(titulo, corpo, aoSalvar, {rotulo='Salvar', perigo=false, largura} = {}){
+  const fundo = document.createElement('div'); fundo.className = 'fundo';
+  fundo.innerHTML = `<form class="modal" ${largura?`style="max-width:${largura}px"`:''} novalidate>
+    <div class="mt"><h2>${esc(titulo)}</h2><button type="button" class="x" aria-label="Fechar">×</button></div>
+    <div class="mc"><div class="erro oculto" data-erro></div>${corpo}</div>
+    <div class="mr"><button type="button" class="btn" data-cancelar>Cancelar</button>
+    ${aoSalvar?`<button type="submit" class="btn ${perigo?'perigo':'prim'}">${esc(rotulo)}</button>`:''}</div></form>`;
+  document.body.appendChild(fundo);
+  const form = fundo.querySelector('form');
+  const fechar = () => { pararDitado(); fundo.remove(); document.removeEventListener('keydown', esc_); };
+  const esc_ = ev => { if(ev.key==='Escape') fechar(); };
+  document.addEventListener('keydown', esc_);
+  fundo.querySelector('.x').onclick = fechar;
+  fundo.querySelector('[data-cancelar]').onclick = fechar;
+  fundo.addEventListener('mousedown', ev => { if(ev.target===fundo) fechar(); });
+  form.onsubmit = async ev => {
+    ev.preventDefault();
+    const bt = form.querySelector('button[type=submit]'), er = form.querySelector('[data-erro]');
+    for(const el of form.querySelectorAll('[required]')){
+      if(!String(el.value||'').trim()){ er.textContent = 'Preencha os campos obrigatórios.'; er.classList.remove('oculto'); el.focus(); return; }
+    }
+    pararDitado();
+    bt.disabled = true; er.classList.add('oculto');
+    try{ const r = await aoSalvar(form); if(r!==false) fechar(); }
+    catch(e){ er.textContent = e.message==='SESSAO'?'Sessão expirada.':e.message; er.classList.remove('oculto'); }
+    finally{ bt.disabled = false; }
+  };
+  ligarDitado(form);
+  const primeiro = form.querySelector('.mc input:not([type=hidden]),.mc select,.mc textarea');
+  if(primeiro) primeiro.focus();
+  return form;
+}
+/* ---- ditado por voz (Chrome/Edge, no computador ou celular) ---- */
+const Reconhecedor = window.SpeechRecognition || window.webkitSpeechRecognition;
+const CAMPOS_VOZ = 'textarea, input[name=titulo], input[name=endereco], input[name=responsaveis], input[name=responsavel], input[name=observacao], input[name=local], input[name=proxima_local]';
+let ditadoAtivo = null;
+function pararDitado(){ if(ditadoAtivo){ try{ ditadoAtivo.rec.stop(); }catch(e){} } }
+function ajustarFala(t){
+  return t.replace(/\s*\bv[íi]rgula\b/gi, ',').replace(/\s*\bponto final\b/gi, '.').replace(/\s*\bdois pontos\b/gi, ':')
+          .replace(/\s*\bnova linha\b\s*/gi, '\n').replace(/\s*\bponto de interroga[çc][ãa]o\b/gi, '?');
+}
+const DICA_VOZ = 'No Windows, clique no campo e aperte as teclas Windows + H para ditar. No celular, use o microfone do teclado.';
+function avisoVoz(msg){
+  modal('Ditado por voz', `<p style="margin:0">${msg}</p><div class="info">${DICA_VOZ}</div>`, null);
+}
+function ligarDitado(raiz){
+  raiz.querySelectorAll(CAMPOS_VOZ).forEach(campo => {
+    if(campo.disabled || campo.dataset.voz) return;
+    campo.dataset.voz = '1';
+    const caixa = document.createElement('div'); caixa.className = 'voz-caixa';
+    campo.parentNode.insertBefore(caixa, campo); caixa.appendChild(campo);
+    const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'voz-bt'; bt.title = 'Ditar por voz';
+    bt.setAttribute('aria-label', 'Ditar por voz');
+    bt.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+    caixa.appendChild(bt);
+    bt.onclick = () => {
+      if(!Reconhecedor) return avisoVoz('Este navegador não tem reconhecimento de voz. Use o Chrome ou o Edge.');
+      if(!window.isSecureContext || location.protocol === 'file:')
+        return avisoVoz('O ditado do sistema só funciona quando ele é aberto por um endereço da internet (https). Aberto como arquivo no computador ou no celular, o navegador bloqueia o microfone sem perguntar.');
+      if(ditadoAtivo && ditadoAtivo.campo === campo){ pararDitado(); return; }
+      pararDitado();
+      const rec = new Reconhecedor();
+      rec.lang = 'pt-BR'; rec.continuous = true; rec.interimResults = true;
+      const base = campo.value.replace(/\s+$/,'');
+      let final = '';
+      const escrever = (provisorio) => {
+        let t = ajustarFala((final + ' ' + provisorio).replace(/\s+/g,' ').trim());
+        if(t && (!base || /[.!?\n]$/.test(base))) t = t.charAt(0).toUpperCase() + t.slice(1);
+        campo.value = base + (base && t && !/^[,.:?]/.test(t) ? (campo.tagName==='TEXTAREA' && /[.!?]$/.test(base) ? ' ' : ' ') : '') + t;
+        campo.dispatchEvent(new Event('input', {bubbles:true}));
+      };
+      rec.onresult = ev => {
+        let prov = '';
+        for(let i = ev.resultIndex; i < ev.results.length; i++){
+          const r = ev.results[i];
+          if(r.isFinal) final += ' ' + r[0].transcript; else prov += r[0].transcript;
+        }
+        escrever(prov);
+      };
+      rec.onerror = ev => {
+        const m = {'not-allowed':'Permita o uso do microfone no navegador para ditar.', 'service-not-allowed':'Permita o uso do microfone no navegador para ditar.',
+          'network':'O ditado precisa de internet.', 'no-speech':'Nenhuma fala detectada. Toque no microfone e fale de novo.', 'audio-capture':'Nenhum microfone encontrado.'}[ev.error];
+        if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed') return avisoVoz('O navegador bloqueou o microfone. Clique no cadeado ao lado do endereço, libere o microfone e tente de novo.');
+        if(ev.error !== 'aborted') aviso(m || ('O ditado falhou (' + ev.error + ').'), true);
+      };
+      rec.onend = () => { escrever(''); caixa.classList.remove('ouvindo'); if(ditadoAtivo && ditadoAtivo.rec === rec) ditadoAtivo = null; };
+      ditadoAtivo = {rec, campo};
+      caixa.classList.add('ouvindo'); campo.focus();
+      try{ rec.start(); }catch(e){ caixa.classList.remove('ouvindo'); ditadoAtivo = null; aviso('Não foi possível iniciar o ditado.', true); }
+    };
+  });
+}
+function confirmar(titulo, texto, acao, rotulo='Excluir'){
+  modal(titulo, `<p style="margin:0">${texto}</p>`, async () => { await acao(); }, {rotulo, perigo:true});
+}
+const val = (f, n) => { const v = f.elements[n] ? String(f.elements[n].value).trim() : ''; return v || null; };
+
+/* ================= Painel ================= */
+const MES3 = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function serieUbs(ubsId){
+  const rs = D.reunioes.filter(r => r.ubs_id===ubsId && r.data<=hoje()).sort((a,b)=>a.data.localeCompare(b.data)).slice(-6);
+  if(rs.length < 2) return '';
+  const val = rs.map(R => parteA(R).concat(parteB(R)).filter(p => !FECHADAS.has(situacaoNa(p, R))).length);
+  const max = Math.max(...val, 1);
+  return `<div class="serie" title="Pontos em aberto ao fim de cada reunião">
+    <div class="leg"><span>Em aberto ao fim de cada reunião</span></div>
+    <div class="barras">${val.map((v,i)=>`<i class="${i===val.length-1?'ult':''}" style="height:${Math.max(6, v/max*100)}%" title="${fmt(rs[i].data)}: ${v} em aberto"></i>`).join('')}</div>
+    <div class="meses vals">${val.map(v=>`<span>${v}</span>`).join('')}</div>
+    <div class="meses">${rs.map(r=>`<span>${MES3[Number(r.data.slice(5,7))-1]}</span>`).join('')}</div></div>`;
+}
+function telaPainel(){
+  const ativas = D.ubs.filter(u=>u.ativa);
+  const ab = abertos(), venc = D.enc.filter(vencido), ano = hoje().slice(0,4);
+  const reunAno = D.reunioes.filter(r=>r.data.startsWith(ano)).length;
+  const resolvAno = D.pontos.filter(p=>FECHADAS.has(p.situacao) && (p.encerrado_em||'').startsWith(ano)).length;
+  const cards = ativas.map(u => {
+    const rs = D.reunioes.filter(r=>r.ubs_id===u.id);
+    const ult = rs.find(r=>r.data<=hoje());
+    const prox = D.agenda.filter(g=>g.tipo==='Reunião' && g.situacao==='Agendada' && g.ubs_id===u.id && g.data>=hoje()).map(g=>g.data).sort()[0] || rs.map(r=>r.proxima_data).filter(d=>d && d>=hoje()).sort()[0];
+    const nAb = ab.filter(p=>p.ubs_id===u.id).length;
+    const nVenc = venc.filter(e=>IX.ponto.get(e.ponto_id)?.ubs_id===u.id).length;
+    const nAg = ab.filter(p=>p.ubs_id===u.id && p.situacao==='Aguardando outro setor').length;
+    return `<div class="card" data-ubs="${u.id}">
+      <div><div class="sig">${esc(u.sigla)}</div><h3>${esc(u.nome)}</h3></div>
+      <div class="nums">
+        <div><b>${nAb}</b><span>em aberto</span></div>
+        <div><b>${nAg}</b><span>outro setor</span></div>
+        <div class="${nVenc?'alerta':''}"><b>${nVenc}</b><span>vencidos</span></div>
+      </div>
+      ${serieUbs(u.id)}
+      <div class="datas"><span>Última: <span class="mono">${fmt(ult&&ult.data)}</span></span><span>Próxima: <span class="mono">${fmt(prox)}</span></span></div>
+    </div>`;
+  }).join('');
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Painel</h1><p class="mudo">Situação dos pontos levantados nas reuniões de matriciamento.</p></div>
+      ${perfil.edita?'<div class="acoes"><button class="btn prim" id="b-nova">+ Nova reunião</button></div>':''}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${ab.length}</div><div class="r">pontos em aberto</div></div>
+      <div class="kpi ${venc.length?'alerta':''}"><div class="v">${venc.length}</div><div class="r">encaminhamentos vencidos</div></div>
+      <div class="kpi"><div class="v">${resolvAno}</div><div class="r">pontos encerrados em ${ano}</div></div>
+      <div class="kpi"><div class="v">${reunAno}</div><div class="r">reuniões em ${ano}</div></div>
+    </div>
+    ${ativas.length ? `<div class="cards">${cards}</div>` :
+      `<div class="bloco"><div class="vazio">Nenhuma UBS cadastrada. ${perfil.admin?'Cadastre as UBS em <a href="#/admin">Administração</a>.':'Peça ao administrador para cadastrar as UBS.'}</div></div>`}`;
+  document.querySelectorAll('.card[data-ubs]').forEach(c => c.onclick = () => { F.ubs = c.dataset.ubs; location.hash = '#/reunioes'; });
+  const bn = $('#b-nova'); if(bn) bn.onclick = () => novaReuniao();
+}
+
+/* ================= Reuniões ================= */
+function filtroUbs(id='f-ubs'){
+  return `<label>UBS<select id="${id}">${opts(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`})), F.ubs, 'Todas as UBS')}</select></label>`;
+}
+function telaReunioes(){
+  const lista = D.reunioes.filter(r => !F.ubs || String(r.ubs_id)===String(F.ubs));
+  const linhas = lista.map(r => {
+    const a = parteA(r), b = parteB(r), c = parteC(r);
+    const pend = a.filter(p=>!atualDe(p.id, r.id)).length;
+    return `<tr class="clica" data-id="${r.id}">
+      <td class="mono">${fmt(r.data)}</td>
+      <td><b>${esc(ubsSigla(r.ubs_id))}</b> <span class="sub">${esc(ubsNome(r.ubs_id))}</span></td>
+      <td class="num mono">${r.numero??'—'}</td>
+      <td class="num mono">${a.length}${pend?` <span class="pend-aviso" title="pontos ainda não atualizados">(${pend} a atualizar)</span>`:''}</td>
+      <td class="num mono">${b.length}</td>
+      <td class="num mono">${c.length}</td>
+      <td class="mono">${fmt(r.proxima_data)}</td></tr>`;
+  }).join('');
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Reuniões</h1><p class="mudo">Uma ata por UBS e data. Toque numa reunião para abrir a ata.</p></div>
+      ${perfil.edita?'<div class="acoes"><button class="btn prim" id="b-nova">+ Nova reunião</button></div>':''}</div>
+    <div class="filtros">${filtroUbs()}</div>
+    <div class="bloco"><div class="corpo sem">${lista.length?`<div class="tab-wrap"><table class="t">
+      <thead><tr><th>Data</th><th>UBS</th><th class="num">Nº</th><th class="num">Retomados</th><th class="num">Novos</th><th class="num">Encaminh.</th><th>Próxima</th></tr></thead>
+      <tbody>${linhas}</tbody></table></div>`:'<div class="vazio">Nenhuma reunião registrada.</div>'}</div></div>`;
+  $('#f-ubs').onchange = e => { F.ubs = e.target.value; telaReunioes(); };
+  document.querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => location.hash = '#/reuniao/'+tr.dataset.id);
+  const bn = $('#b-nova'); if(bn) bn.onclick = () => novaReuniao();
+}
+function outrosHTML(lista){
+  const linha = p => `<div class="part-linha">
+    <input type="text" placeholder="Nome" data-p="nome" value="${esc(p.nome)}">
+    <select data-p="funcao">${opts(FUNCOES, p.funcao, 'Função')}</select>
+    <input type="text" placeholder="Microárea/área" data-p="area" value="${esc(p.area)}">
+    <label class="cad" title="Incluir no cadastro para aparecer nas próximas reuniões"><input type="checkbox" data-p="salvar"> cadastrar</label>
+    <button type="button" data-rem title="Remover">×</button></div>`;
+  return `<div class="campo"><span>Outros participantes <small>(quem não está no cadastro · marque "cadastrar" para a pessoa aparecer nas próximas reuniões)</small></span>
+    <div id="parts" style="display:grid;gap:6px">${lista.map(linha).join('')}</div>
+    <button type="button" class="btn mini" id="b-addpart" style="align-self:flex-start;margin-top:4px">+ Outro participante</button></div>`;
+}
+const areaAgente = g => [g.equipe, g.microarea].filter(Boolean).join(' · ');
+const ubsDoAgente = g => g.ubs_id ? [g.ubs_id] : (g.ubs_ids||[]);
+const atende = (g, ubs) => ubsDoAgente(g).includes(ubs);
+const siglasAgente = g => ubsDoAgente(g).map(ubsSigla).join(', ');
+function ordemAgente(a,b){ return String(a.equipe||'').localeCompare(String(b.equipe||''),'pt',{numeric:true}) || String(a.microarea||'').localeCompare(String(b.microarea||''),'pt',{numeric:true}) || a.nome.localeCompare(b.nome,'pt'); }
+function presencaHTML(){
+  return `<div class="campo"><span>Presentes — toque para marcar <span class="pres-cont" id="pres-cont"></span></span>
+    <div id="presenca" style="display:grid;gap:8px"></div></div>`;
+}
+function ligarPresenca(form, r){
+  const marcados = new Set((r ? r.participantes||[] : []).filter(p=>p.agente_id).map(p=>Number(p.agente_id)));
+  const box = form.querySelector('#presenca'), cont = form.querySelector('#pres-cont');
+  const contar = () => { cont.textContent = marcados.size ? `(${marcados.size} marcado${marcados.size>1?'s':''})` : ''; };
+  const grupo = (titulo, lista, mostrarUbs) => !lista.length ? '' : `<div class="pres-grupo"><div class="pg-tit">${esc(titulo)} <span class="mudo mono">${lista.length}</span>
+      <span><button type="button" class="btn mini" data-todos>Todos</button><button type="button" class="btn mini" data-nenhum>Nenhum</button></span></div>
+      <div class="chips">${lista.map(g => `<label class="chip"><input type="checkbox" data-ag="${g.id}" ${marcados.has(g.id)?'checked':''}>
+        <span>${esc(g.nome)}<small>${esc([g.funcao!=='ACS'&&g.funcao!=='ACV'?g.funcao:'', mostrarUbs?siglasAgente(g):'', areaAgente(g)].filter(Boolean).join(' · ') || g.funcao)}</small></span></label>`).join('')}</div></div>`;
+  const desenhar = () => {
+    const ubs = Number(form.ubs_id.value) || null;
+    const ativos = D.agentes.filter(g => g.ativo || marcados.has(g.id));
+    const acs = ativos.filter(g => g.funcao==='ACS' && ubs && g.ubs_id===ubs).sort(ordemAgente);
+    const acv = ativos.filter(g => g.funcao==='ACV' && ubs && atende(g, ubs)).sort(ordemAgente);
+    const outros = ativos.filter(g => g.funcao!=='ACS' && g.funcao!=='ACV' && (!ubsDoAgente(g).length || (ubs && atende(g, ubs)))).sort(ordemAgente);
+    const acvOutras = ativos.filter(g => g.funcao==='ACV' && !acv.includes(g)).sort(ordemAgente);
+    // marcados de outra UBS continuam visíveis para não sumirem ao trocar a UBS
+    const fora = ativos.filter(g => marcados.has(g.id) && g.funcao!=='ACV' && !acs.includes(g) && !outros.includes(g));
+    const ubsNomeSel = ubs ? ubsNome(ubs) : '';
+    box.innerHTML = (!ubs ? '<div class="info">Escolha a UBS para ver os ACS dela.</div>' : (acs.length ? '' : '<div class="info">Nenhum ACS cadastrado para esta UBS.</div>'))
+      + grupo('ACS — '+ubsNomeSel, acs) + grupo('ACV — '+(ubsNomeSel||'escolha a UBS'), acv, true) + grupo('UBS e supervisão', outros, true) + grupo('Marcados de outras UBS', fora, true)
+      + (acvOutras.length ? `<details class="pres-grupo"><summary style="cursor:pointer;font-size:12px;font-weight:600">ACV de outras UBS (${acvOutras.length})</summary><div style="margin-top:8px">${grupo('', acvOutras, true).replace('class="pres-grupo"','style="border:0;padding:0"')}</div></details>` : '')
+      + (D.agentes.length ? '' : '<div class="info">Nenhum agente cadastrado ainda. O administrador cadastra em Administração → Agentes.</div>');
+    box.querySelectorAll('input[data-ag]').forEach(ch => ch.onchange = () => { const id = Number(ch.dataset.ag); ch.checked ? marcados.add(id) : marcados.delete(id); contar(); });
+    box.querySelectorAll('.pres-grupo').forEach(gr => {
+      gr.querySelector('[data-todos]').onclick = () => { gr.querySelectorAll('input[data-ag]').forEach(ch => { ch.checked = true; marcados.add(Number(ch.dataset.ag)); }); contar(); };
+      gr.querySelector('[data-nenhum]').onclick = () => { gr.querySelectorAll('input[data-ag]').forEach(ch => { ch.checked = false; marcados.delete(Number(ch.dataset.ag)); }); contar(); };
+    });
+    contar();
+  };
+  form._marcados = marcados; form._desenharPresenca = desenhar;
+  desenhar();
+  // outros participantes (texto livre)
+  const pbox = form.querySelector('#parts');
+  const ligar = () => pbox.querySelectorAll('[data-rem]').forEach(b => b.onclick = () => b.parentElement.remove());
+  form.querySelector('#b-addpart').onclick = () => {
+    const tmp = document.createElement('div'); tmp.innerHTML = outrosHTML([{}]);
+    pbox.appendChild(tmp.querySelector('.part-linha')); ligar();
+    pbox.lastElementChild.querySelector('input').focus();
+  };
+  ligar();
+}
+async function cadastrarOutros(form, ubsId){
+  const linhas = [...form.querySelectorAll('#parts .part-linha')].filter(l => l.querySelector('[data-p=salvar]').checked);
+  for(const l of linhas){
+    const nome = l.querySelector('[data-p=nome]').value.trim(), funcao = l.querySelector('[data-p=funcao]').value, area = l.querySelector('[data-p=area]').value.trim();
+    if(!nome || !funcao) throw new Error('Para cadastrar, preencha nome e função de cada pessoa marcada.');
+    const [g] = await inserir('matric_agentes', {nome, funcao, ubs_id:funcao==='ACS'?ubsId:null, ubs_ids:funcao==='ACS'?[]:[ubsId], microarea: area || null});
+    D.agentes.push(g); IX.agente.set(g.id, g); form._marcados.add(g.id); l.remove();
+  }
+  if(linhas.length) form._desenharPresenca();
+}
+function lerParticipantes(form){
+  const cad = [...form._marcados].map(id => IX.agente.get(id)).filter(Boolean).sort((a,b) =>
+    (({ACS:0,ACV:1})[a.funcao]??2) - (({ACS:0,ACV:1})[b.funcao]??2) || ordemAgente(a,b))
+    .map(g => ({agente_id:g.id, nome:g.nome, funcao:g.funcao, area:g.funcao==='ACS' ? areaAgente(g) : [siglasAgente(g), areaAgente(g)].filter(Boolean).join(' · ')}));
+  const livres = [...form.querySelectorAll('#parts .part-linha')].map(l => ({
+    nome: l.querySelector('[data-p=nome]').value.trim(),
+    funcao: l.querySelector('[data-p=funcao]').value,
+    area: l.querySelector('[data-p=area]').value.trim()
+  })).filter(p => p.nome || p.funcao);
+  return cad.concat(livres);
+}
+function formReuniao(r, pre){
+  pre = pre || {};
+  const ubsOpts = D.ubs.filter(u=>u.ativa || (r && u.id===r.ubs_id)).map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}));
+  return `
+    <div class="grade2">
+      <label class="campo"><span>UBS *</span><select name="ubs_id" required ${r?'disabled':''}>${opts(ubsOpts, r?r.ubs_id:(pre.ubs_id||F.ubs), 'Selecione')}</select></label>
+      <label class="campo"><span>Data *</span><input type="date" name="data" required value="${esc(r?r.data:(pre.data||hoje()))}" ${r?'disabled':''}></label>
+    </div>
+    ${r?'<small class="mudo">UBS e data não podem ser alteradas depois de criada a reunião.</small>':''}
+    <div class="grade3">
+      <label class="campo"><span>Reunião nº</span><input type="number" name="numero" min="1" value="${esc(r?r.numero:'')}"><small>Sequencial da UBS no ano</small></label>
+      <label class="campo"><span>Início</span><input type="text" name="hora_inicio" placeholder="hh:mm" value="${esc(r?r.hora_inicio:(pre.hora||''))}"></label>
+      <label class="campo"><span>Término</span><input type="text" name="hora_fim" placeholder="hh:mm" value="${esc(r?r.hora_fim:'')}"></label>
+    </div>
+    <div class="grade2">
+      <label class="campo"><span>Local</span><input type="text" name="local" value="${esc(r?r.local:(pre.local||''))}"></label>
+      <label class="campo"><span>Redigida por</span><input type="text" name="redator" value="${esc(r?r.redator:(perfil.nome||''))}"></label>
+    </div>
+    ${presencaHTML()}
+    ${outrosHTML(r ? (r.participantes||[]).filter(p=>!p.agente_id) : [])}`;
+}
+function sugerirNumero(form){
+  const u = form.ubs_id.value, d = form.data.value;
+  if(!u || !d || form.numero.dataset.mexido) return;
+  const ant = D.reunioes.filter(r => String(r.ubs_id)===u && r.data.slice(0,4)===d.slice(0,4) && r.data < d).length;
+  form.numero.value = ant + 1;
+}
+function novaReuniao(pre){
+  if(!D.ubs.some(u=>u.ativa)) return aviso('Cadastre ao menos uma UBS em Administração.', true);
+  const form = modal('Nova reunião', formReuniao(null, pre), async f => {
+    await cadastrarOutros(f, Number(f.ubs_id.value));
+    const linha = {ubs_id:Number(f.ubs_id.value), data:f.data.value, numero:f.numero.value?Number(f.numero.value):null,
+      hora_inicio:val(f,'hora_inicio'), hora_fim:val(f,'hora_fim'), local:val(f,'local'), redator:val(f,'redator'), participantes:lerParticipantes(f)};
+    const [r] = await inserir('matric_reunioes', linha);
+    // liga ao agendamento desta UBS nesta data, se houver
+    const ag = D.agenda.find(g => g.tipo==='Reunião' && g.situacao==='Agendada' && !g.reuniao_id && g.ubs_id===r.ubs_id && g.data===r.data);
+    if(ag) await alterar('matric_agenda', ag.id, {situacao:'Realizada', reuniao_id:r.id}).catch(()=>{});
+    await carregar(); location.hash = '#/reuniao/'+r.id; render();
+    aviso('Reunião criada. Os pontos em aberto da UBS já estão na Parte A.');
+  }, {rotulo:'Criar reunião', largura:820});
+  ligarPresenca(form, null);
+  form.numero.oninput = () => form.numero.dataset.mexido = '1';
+  form.ubs_id.onchange = () => { sugerirNumero(form); form._desenharPresenca(); };
+  form.data.onchange = () => sugerirNumero(form);
+  sugerirNumero(form);
+}
+function editarReuniao(r){
+  const form = modal('Editar identificação da reunião', formReuniao(r), async f => {
+    await cadastrarOutros(f, r.ubs_id);
+    await alterar('matric_reunioes', r.id, {numero:f.numero.value?Number(f.numero.value):null,
+      hora_inicio:val(f,'hora_inicio'), hora_fim:val(f,'hora_fim'), local:val(f,'local'), redator:val(f,'redator'), participantes:lerParticipantes(f)});
+    await recarregar('Reunião atualizada.');
+  }, {largura:820});
+  ligarPresenca(form, r);
+}
+
+/* ================= Ata ================= */
+function telaReuniao(id){
+  const R = IX.reun.get(id);
+  if(!R){ $('#app').innerHTML = '<div class="bloco"><div class="vazio">Reunião não encontrada. <a href="#/reunioes">Voltar</a></div></div>'; return; }
+  const ed = perfil.edita, A = parteA(R), B = parteB(R), C = parteC(R);
+  const pend = A.filter(p=>!atualDe(p.id, R.id)).length;
+  const parts = R.participantes || [];
+  const linhasA = A.map(p => {
+    const a = atualDe(p.id, R.id), todosEnc = encAnteriores(p, R.data);
+    // mostra os da reunião anterior e os ainda pendentes; os antigos concluídos ficam no histórico do ponto
+    const ultD = todosEnc.reduce((m,e) => { const d = dataReun(e.reuniao_id)||''; return d > m ? d : m; }, '');
+    const encs = todosEnc.filter(e => !e.concluido || dataReun(e.reuniao_id) === ultD), ocultos = todosEnc.length - encs.length;
+    return `<tr>
+      <td class="cod"><a href="#/ponto/${p.id}">${esc(p.codigo)}</a></td>
+      <td>${esc(p.endereco||'—')}<div class="sub mono">${[p.quarteirao?'Q. '+esc(p.quarteirao):'', esc(p.microarea||'')].filter(Boolean).join(' · ')}</div></td>
+      <td>${esc(p.descricao)}${p.tipo?`<div class="sub">${esc(p.tipo)}</div>`:''}</td>
+      <td>${encs.length?encs.map(e=>`<div>${esc(e.acao)}<div class="sub">${esc(e.responsavel||'')}${e.prazo?' · '+fmt(e.prazo):''}${e.concluido?' · <span class="ok">concluído</span>':vencido(e)?' · <span class="venc">vencido</span>':''}</div></div>`).join(''):'<span class="mudo">—</span>'}${ocultos?`<div class="sub"><a href="#/ponto/${p.id}">+ ${ocultos} anterior(es) concluído(s)</a></div>`:''}</td>
+      <td>${a&&a.feito?esc(a.feito):'<span class="mudo">—</span>'}</td>
+      <td>${a?sit(a.situacao):`<span class="sit sit-pendente" title="Situação anterior: ${esc(situacaoAntes(p,R.data))}">a atualizar</span><div class="sub">antes: ${esc(situacaoAntes(p,R.data))}</div>`}</td>
+      ${ed?`<td class="acao"><button class="btn mini" data-atual="${p.id}">${a?'Editar':'Atualizar'}</button></td>`:''}</tr>`;
+  }).join('');
+  const linhasB = B.map(p => `<tr>
+      <td class="cod"><a href="#/ponto/${p.id}">${esc(p.codigo)}</a></td>
+      <td>${esc(p.endereco||'—')}<div class="sub mono">${[p.quarteirao?'Q. '+esc(p.quarteirao):'', esc(p.microarea||'')].filter(Boolean).join(' · ')}</div></td>
+      <td>${esc(p.tipo||'—')}</td>
+      <td>${esc(p.descricao)}</td>
+      <td>${esc(p.levantado_por||'—')}</td>
+      ${ed?`<td class="acao"><button class="btn mini" data-epto="${p.id}">Editar</button></td>`:''}</tr>`).join('');
+  const linhasC = C.map(e => { const p = IX.ponto.get(e.ponto_id); return `<tr>
+      <td class="cod">${p?`<a href="#/ponto/${p.id}">${esc(p.codigo)}</a>`:'—'}</td>
+      <td>${esc(e.acao)}</td>
+      <td>${esc(e.responsavel||'—')}</td>
+      <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}</td>
+      <td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td>
+      ${ed?`<td class="acao"><button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button> <button class="btn mini" data-eenc="${e.id}">Editar</button></td>`:''}</tr>`; }).join('');
+  const resolvidos = A.filter(p => { const a = atualDe(p.id,R.id); return a && FECHADAS.has(a.situacao); }).length;
+  const emAberto = A.concat(B).filter(p => !FECHADAS.has(situacaoNa(p, R))).length;
+  const thAcao = ed ? '<th class="acao"></th>' : '';
+
+  $('#app').innerHTML = `
+    <div class="ata-cab"><b>Ata da Reunião de Matriciamento ACS × ACV</b>
+      <span>Prefeitura Municipal de Paulínia · Departamento de Vigilância em Saúde · Divisão de Controle de Vetores</span></div>
+    <div class="cab"><div>
+      <a href="#/reunioes" class="lnk nao-imprime">← Reuniões</a>
+      <h1>${esc(ubsSigla(R.ubs_id))} — ${esc(ubsNome(R.ubs_id))}</h1>
+      <p class="mudo">Reunião ${R.numero?'nº '+R.numero+' · ':''}<span class="mono">${fmt(R.data)}</span></p></div>
+      <div class="acoes nao-imprime">
+        <button class="btn" id="b-imp">Imprimir / PDF</button>
+        ${ed?'<button class="btn" id="b-edr">Editar identificação</button><button class="btn perigo" id="b-exr">Excluir</button>':''}
+      </div></div>
+
+    <section class="bloco"><div class="tit"><h2>Identificação</h2></div><div class="corpo">
+      <div class="ident">
+        <div><span>UBS</span><b>${esc(ubsNome(R.ubs_id))}</b></div>
+        <div><span>Data</span><b class="mono">${fmt(R.data)}</b></div>
+        <div><span>Reunião nº</span><b class="mono">${R.numero??'—'}</b></div>
+        <div><span>Local</span><b>${esc(R.local||'—')}</b></div>
+        <div><span>Horário</span><b class="mono">${R.hora_inicio||R.hora_fim?esc(R.hora_inicio||'?')+' – '+esc(R.hora_fim||'?'):'—'}</b></div>
+        <div><span>Redigida por</span><b>${esc(R.redator||'—')}</b></div>
+      </div>
+      ${parts.length?`<div class="tab-wrap" style="margin-top:14px"><table class="t"><thead><tr><th>Participante</th><th>Função</th><th>Microárea / área</th></tr></thead>
+        <tbody>${parts.map(p=>`<tr><td>${esc(p.nome)}</td><td>${esc(p.funcao)}</td><td>${esc(p.area)}</td></tr>`).join('')}</tbody></table></div>`:
+        '<p class="mudo" style="margin:12px 0 0;font-size:13px">Nenhum participante registrado.</p>'}
+    </div></section>
+
+    <section class="bloco"><div class="tit"><div><h2>Parte A — Retomada dos pontos anteriores</h2>
+      <p class="mudo">Pontos desta UBS que estavam em aberto antes desta reunião.</p></div>
+      ${pend?`<span class="pend-aviso">${pend} ponto(s) ainda sem atualização</span>`:''}</div>
+      <div class="corpo sem">${A.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Código</th><th>Endereço · quarteirão · microárea</th><th>Ponto</th><th>Encaminhamento anterior</th><th>O que foi feito</th><th>Situação</th>${thAcao}</tr></thead>
+        <tbody>${linhasA}</tbody></table></div>`:'<div class="vazio">Nenhum ponto em aberto de reuniões anteriores.</div>'}</div></section>
+
+    <section class="bloco"><div class="tit"><div><h2>Parte B — Novos pontos levantados</h2>
+      <p class="mudo">Cada ponto novo recebe o próximo código livre da UBS.</p></div>
+      ${ed?'<button class="btn prim nao-imprime" id="b-npto">+ Novo ponto</button>':''}</div>
+      <div class="corpo sem">${B.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Código</th><th>Endereço · quarteirão · microárea</th><th>Tipo</th><th>Descrição</th><th>Levantado por</th>${thAcao}</tr></thead>
+        <tbody>${linhasB}</tbody></table></div>`:'<div class="vazio">Nenhum ponto novo nesta reunião.</div>'}</div></section>
+
+    <section class="bloco"><div class="tit"><div><h2>Parte C — Encaminhamentos</h2>
+      <p class="mudo">Ação, responsável e prazo para cada ponto. Na próxima reunião, aparecem como "Encaminhamento anterior".</p></div>
+      ${ed?'<button class="btn prim nao-imprime" id="b-nenc">+ Encaminhamento</button>':''}</div>
+      <div class="corpo sem">${C.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Ponto</th><th>Encaminhamento</th><th>Responsável</th><th>Prazo</th><th>Concluído</th>${thAcao}</tr></thead>
+        <tbody>${linhasC}</tbody></table></div>`:'<div class="vazio">Nenhum encaminhamento registrado.</div>'}</div></section>
+
+    <section class="bloco"><div class="tit"><div><h2>Parte D — Pactuações</h2>
+      <p class="mudo">Combinados firmados nesta reunião. ${(() => { const n = D.pact.filter(k=>k.situacao!=='Encerrada' && (!k.ubs_id || k.ubs_id===R.ubs_id) && k.reuniao_id!==R.id).length; return n ? `<a href="#/pactuacoes" class="nao-imprime" data-pubs="${R.ubs_id}">Ver as ${n} pactuações vigentes desta UBS</a>` : ''; })()}</p></div>
+      ${ed?'<button class="btn prim nao-imprime" id="b-npact">+ Pactuação</button>':''}</div>
+      <div class="corpo sem">${tabelaPact(D.pact.filter(k=>k.reuniao_id===R.id), ed, false)}</div></section>
+
+    <section class="bloco"><div class="tit"><h2>Fechamento</h2>${ed?'<button class="btn nao-imprime" id="b-fech">Editar fechamento</button>':''}</div><div class="corpo">
+      <div class="ident">
+        <div><span>Pontos retomados</span><b class="mono">${A.length}</b></div>
+        <div><span>Resolvidos ou encerrados</span><b class="mono">${resolvidos}</b></div>
+        <div><span>Novos pontos</span><b class="mono">${B.length}</b></div>
+        <div><span>Em aberto para a próxima</span><b class="mono">${emAberto}</b></div>
+        <div><span>Próxima reunião</span><b class="mono">${fmt(R.proxima_data)}</b></div>
+        <div><span>Local da próxima</span><b>${esc(R.proxima_local||'—')}</b></div>
+      </div>
+      <div style="margin-top:12px"><span class="mudo" style="font-size:11px;text-transform:uppercase;letter-spacing:.3px">Observações gerais</span>
+        <p style="margin:4px 0 0;white-space:pre-wrap">${esc(R.observacoes||'—')}</p></div>
+      <div class="assin">${(parts.length?parts:[{},{},{},{}]).map(p=>`<div>${esc(p.nome||'')}${p.funcao?' · '+esc(p.funcao):''}</div>`).join('')}</div>
+      <p class="mudo" style="font-size:11px;margin:14px 0 0">Registrada por ${esc(R.criado_por||'—')} · última alteração ${esc(R.atualizado_por||'—')}</p>
+    </div></section>`;
+
+  $('#b-imp').onclick = () => window.print();
+  document.querySelectorAll('[data-pubs]').forEach(a => a.onclick = () => { F.kUbs = a.dataset.pubs; F.kSit = 'ativas'; });
+  ligarPact(ed);
+  if(!ed) return;
+  $('#b-npact').onclick = () => formPact(null, R);
+  $('#b-edr').onclick = () => editarReuniao(R);
+  $('#b-exr').onclick = () => confirmar('Excluir reunião',
+    `Excluir a reunião de <b>${fmt(R.data)}</b> da ${esc(ubsSigla(R.ubs_id))}? As atualizações e encaminhamentos registrados nela também serão apagados. Se a reunião tiver pontos novos (Parte B), exclua os pontos antes.`,
+    async () => { await excluir('matric_reunioes', R.id); await carregar(); location.hash = '#/reunioes'; aviso('Reunião excluída.'); });
+  $('#b-npto').onclick = () => formPonto(R, null);
+  $('#b-nenc').onclick = () => formEnc(R, null);
+  $('#b-fech').onclick = () => modal('Fechamento da reunião', `
+    <div class="grade2">
+      <label class="campo"><span>Próxima reunião <small>(entra na Agenda)</small></span><input type="date" name="proxima_data" value="${esc(R.proxima_data||'')}"></label>
+      <label class="campo"><span>Local da próxima</span><input type="text" name="proxima_local" value="${esc(R.proxima_local||'')}"></label>
+    </div>
+    <label class="campo"><span>Observações gerais</span><textarea name="observacoes" rows="4">${esc(R.observacoes||'')}</textarea></label>`,
+    async f => {
+      const pd = val(f,'proxima_data');
+      await alterar('matric_reunioes', R.id, {proxima_data:pd, proxima_local:val(f,'proxima_local'), observacoes:val(f,'observacoes')});
+      let msg = 'Fechamento salvo.';
+      if(pd && !D.agenda.some(g => g.tipo==='Reunião' && g.ubs_id===R.ubs_id && g.data===pd && g.situacao!=='Cancelada')){
+        await inserir('matric_agenda', {tipo:'Reunião', ubs_id:R.ubs_id, data:pd, local:val(f,'proxima_local'), titulo:'Reunião de matriciamento'});
+        msg = 'Fechamento salvo e próxima reunião agendada.';
+      }
+      await recarregar(msg);
+    });
+  document.querySelectorAll('[data-atual]').forEach(b => b.onclick = () => formAtualizacao(R, IX.ponto.get(b.dataset.atual)));
+  document.querySelectorAll('[data-epto]').forEach(b => b.onclick = () => formPonto(R, IX.ponto.get(b.dataset.epto)));
+  document.querySelectorAll('[data-eenc]').forEach(b => b.onclick = () => formEnc(R, D.enc.find(e=>e.id===b.dataset.eenc)));
+  document.querySelectorAll('[data-conc]').forEach(b => b.onclick = async () => {
+    const e = D.enc.find(x=>x.id===b.dataset.conc); b.disabled = true;
+    try{ await alterar('matric_encaminhamentos', e.id, {concluido:!e.concluido}); await recarregar(e.concluido?'Encaminhamento reaberto.':'Encaminhamento concluído.'); }
+    catch(er){ aviso(er.message, true); b.disabled = false; }
+  });
+}
+function formAtualizacao(R, p){
+  const a = atualDe(p.id, R.id), encs = encAnteriores(p, R.data);
+  modal(`Atualizar ${p.codigo}`, `
+    <div class="info"><b>${esc(p.descricao)}</b><br>${esc(p.endereco||'')}${p.quarteirao?' · Q. '+esc(p.quarteirao):''}
+      <br><span class="mudo">Situação antes desta reunião: ${esc(situacaoAntes(p,R.data))}</span>
+      ${encs.length?'<br><span class="mudo">Encaminhamento anterior: '+encs.map(e=>esc(e.acao)+(e.responsavel?' ('+esc(e.responsavel)+')':'')).join('; ')+'</span>':''}</div>
+    <label class="campo"><span>O que foi feito *</span><textarea name="feito" rows="3" required>${esc(a?a.feito:'')}</textarea></label>
+    <label class="campo"><span>Situação atual *</span><select name="situacao" required>${opts(SITUACOES, a?a.situacao:situacaoAntes(p,R.data))}</select>
+      <small>Resolvido e Encerrado sem solução tiram o ponto das próximas atas.</small></label>
+    ${encs.some(e=>!e.concluido)?`<label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="concluir" style="width:auto"> Marcar os encaminhamentos anteriores como concluídos</label>`:''}
+    ${a?'<button type="button" class="lnk" id="b-delatual" style="justify-self:start;color:var(--vencido)">Remover esta atualização</button>':''}`,
+    async f => {
+      await gravarOuAtualizar('matric_atualizacoes', {ponto_id:p.id, reuniao_id:R.id, feito:val(f,'feito'), situacao:f.situacao.value}, 'ponto_id,reuniao_id');
+      if(f.concluir && f.concluir.checked){
+        for(const e of encs.filter(e=>!e.concluido)) await alterar('matric_encaminhamentos', e.id, {concluido:true});
+      }
+      await recarregar('Ponto atualizado.');
+    });
+  const bd = $('#b-delatual');
+  if(bd) bd.onclick = async () => {
+    try{ await excluir('matric_atualizacoes', a.id); document.querySelector('.fundo').remove(); await recarregar('Atualização removida.'); }
+    catch(e){ aviso(e.message, true); }
+  };
+}
+function formPonto(R, p){
+  const titulo = p ? `Editar ${p.codigo}` : 'Novo ponto';
+  modal(titulo, `
+    ${p?'':`<div class="info">O código será gerado ao salvar: <b class="mono">${esc(ubsSigla(R.ubs_id))}-${R.data.slice(0,4)}-…</b></div>`}
+    <div class="grade3">
+      <label class="campo"><span>Microárea</span><input type="text" name="microarea" value="${esc(p?p.microarea:'')}"></label>
+      <label class="campo"><span>Quarteirão</span><input type="text" name="quarteirao" value="${esc(p?p.quarteirao:'')}"></label>
+      <label class="campo"><span>Tipo de situação</span><select name="tipo">${opts(TIPOS, p?p.tipo:'', 'Selecione')}</select></label>
+    </div>
+    <label class="campo"><span>Endereço</span><input type="text" name="endereco" value="${esc(p?p.endereco:'')}" placeholder="Rua, número"></label>
+    <label class="campo"><span>Descrição *</span><textarea name="descricao" rows="3" required>${esc(p?p.descricao:'')}</textarea>
+      <small>Não registre nome de morador nem dado de saúde.</small></label>
+    <label class="campo"><span>Levantado por</span><input type="text" name="levantado_por" value="${esc(p?p.levantado_por:'')}" placeholder="Ex.: ACS da microárea 02"></label>
+    ${p?'<button type="button" class="lnk" id="b-delpto" style="justify-self:start;color:var(--vencido)">Excluir este ponto</button>':''}`,
+    async f => {
+      const linha = {microarea:val(f,'microarea'), quarteirao:val(f,'quarteirao'), tipo:val(f,'tipo'), endereco:val(f,'endereco'), descricao:val(f,'descricao'), levantado_por:val(f,'levantado_por')};
+      if(p){ await alterar('matric_pontos', p.id, linha); await recarregar('Ponto atualizado.'); }
+      else { const [n] = await inserir('matric_pontos', {...linha, ubs_id:R.ubs_id, reuniao_origem:R.id}); await recarregar('Ponto '+n.codigo+' criado.'); }
+    }, {largura:680});
+  const bd = $('#b-delpto');
+  if(bd) bd.onclick = () => { document.querySelector('.fundo').remove();
+    confirmar('Excluir ponto', `Excluir <b class="mono">${esc(p.codigo)}</b>? O histórico e os encaminhamentos dele também serão apagados. O código não será reaproveitado.`,
+      async () => { await excluir('matric_pontos', p.id); await recarregar('Ponto excluído.'); }); };
+}
+function formEnc(R, e){
+  const candidatos = parteA(R).concat(parteB(R));
+  if(!candidatos.length) return aviso('Registre ou retome um ponto antes de criar encaminhamentos.', true);
+  modal(e?'Editar encaminhamento':'Novo encaminhamento', `
+    <label class="campo"><span>Ponto *</span><select name="ponto_id" required>${opts(candidatos.map(p=>({v:p.id,t:`${p.codigo} — ${p.descricao.slice(0,70)}`})), e?e.ponto_id:'', 'Selecione')}</select></label>
+    <label class="campo"><span>Encaminhamento (ação) *</span><textarea name="acao" rows="3" required>${esc(e?e.acao:'')}</textarea></label>
+    <div class="grade2">
+      <label class="campo"><span>Responsável</span><input type="text" name="responsavel" value="${esc(e?e.responsavel:'')}" placeholder="Nome e função"></label>
+      <label class="campo"><span>Prazo</span><input type="date" name="prazo" value="${esc(e?e.prazo||'':'')}"></label>
+    </div>
+    ${e?'<button type="button" class="lnk" id="b-delenc" style="justify-self:start;color:var(--vencido)">Excluir este encaminhamento</button>':''}`,
+    async f => {
+      const linha = {ponto_id:f.ponto_id.value, acao:val(f,'acao'), responsavel:val(f,'responsavel'), prazo:val(f,'prazo')};
+      if(e) await alterar('matric_encaminhamentos', e.id, linha);
+      else await inserir('matric_encaminhamentos', {...linha, reuniao_id:R.id});
+      await recarregar(e?'Encaminhamento atualizado.':'Encaminhamento registrado.');
+    });
+  const bd = $('#b-delenc');
+  if(bd) bd.onclick = async () => {
+    try{ await excluir('matric_encaminhamentos', e.id); document.querySelector('.fundo').remove(); await recarregar('Encaminhamento excluído.'); }
+    catch(er){ aviso(er.message, true); }
+  };
+}
+
+/* ================= Pontos ================= */
+function pontosFiltrados(){
+  const b = F.pBusca.toLowerCase();
+  return D.pontos.filter(p =>
+    (!F.ubs || String(p.ubs_id)===String(F.ubs)) &&
+    (F.pSit==='todos' || (F.pSit==='abertos' ? !FECHADAS.has(p.situacao) : p.situacao===F.pSit)) &&
+    (!F.pTipo || p.tipo===F.pTipo) &&
+    (!b || [p.codigo,p.endereco,p.quarteirao,p.descricao,p.microarea,p.levantado_por].some(x => String(x||'').toLowerCase().includes(b)))
+  ).sort((a,b)=>(dataReun(a.reuniao_origem)||'').localeCompare(dataReun(b.reuniao_origem)||'') || a.codigo.localeCompare(b.codigo));
+}
+function telaPontos(){
+  const sitOpts = [{v:'abertos',t:'Em aberto (todos)'},{v:'todos',t:'Todas as situações'}].concat(SITUACOES.map(s=>({v:s,t:s})));
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Pontos</h1><p class="mudo">Todas as situações levantadas, com o tempo em aberto.</p></div>
+      <div class="acoes"><button class="btn" id="b-csv">Exportar CSV</button></div></div>
+    <div class="filtros">${filtroUbs()}
+      <label>Situação<select id="f-sit">${opts(sitOpts, F.pSit)}</select></label>
+      <label>Tipo<select id="f-tipo">${opts(TIPOS, F.pTipo, 'Todos os tipos')}</select></label>
+      <label>Buscar<input type="search" id="f-busca" placeholder="Código, endereço, quarteirão…" value="${esc(F.pBusca)}"></label></div>
+    <div class="bloco"><div class="corpo sem" id="lista-pontos"></div></div>`;
+  const desenhar = () => {
+    const lista = pontosFiltrados(), h = hoje();
+    $('#lista-pontos').innerHTML = lista.length ? `<div class="tab-wrap"><table class="t">
+      <thead><tr><th>Código</th><th>UBS</th><th>Micro</th><th>Endereço / Quarteirão</th><th>Tipo</th><th>Descrição</th><th>Situação</th><th>Desde</th><th class="num">Dias</th></tr></thead>
+      <tbody>${lista.map(p => { const d0 = dataReun(p.reuniao_origem), fim = p.encerrado_em || h; return `<tr class="clica" data-id="${p.id}">
+        <td class="cod">${esc(p.codigo)}</td><td>${esc(ubsSigla(p.ubs_id))}</td><td class="mono">${esc(p.microarea||'—')}</td>
+        <td>${esc(p.endereco||'—')}${p.quarteirao?`<div class="sub mono">Q. ${esc(p.quarteirao)}</div>`:''}</td>
+        <td>${esc(p.tipo||'—')}</td><td>${esc(p.descricao)}</td><td>${sit(p.situacao)}</td>
+        <td class="mono">${fmt(d0)}</td><td class="num mono">${d0?dias(d0,fim):'—'}</td></tr>`; }).join('')}</tbody></table></div>
+      <div class="vazio" style="border-top:1px solid var(--linha2)">${lista.length} ponto(s)</div>` : '<div class="vazio">Nenhum ponto com estes filtros.</div>';
+    document.querySelectorAll('#lista-pontos tr[data-id]').forEach(tr => tr.onclick = () => location.hash = '#/ponto/'+tr.dataset.id);
+  };
+  $('#f-ubs').onchange = e => { F.ubs = e.target.value; desenhar(); };
+  $('#f-sit').onchange = e => { F.pSit = e.target.value; desenhar(); };
+  $('#f-tipo').onchange = e => { F.pTipo = e.target.value; desenhar(); };
+  $('#f-busca').oninput = e => { F.pBusca = e.target.value; desenhar(); };
+  $('#b-csv').onclick = exportarCSV;
+  desenhar();
+}
+function exportarCSV(){
+  const lista = pontosFiltrados(), h = hoje();
+  const cab = ['Código','UBS','Microárea','Endereço','Quarteirão','Tipo','Descrição','Levantado por','Situação','Reunião de origem','Encerrado em','Dias','Último "o que foi feito"','Encaminhamentos pendentes'];
+  const q = v => '"' + String(v??'').replace(/"/g,'""').replace(/\r?\n/g,' ') + '"';
+  const linhas = lista.map(p => {
+    const hist = (IX.atualPonto.get(p.id)||[]).slice().sort((a,b)=>(dataReun(b.reuniao_id)||'').localeCompare(dataReun(a.reuniao_id)||''));
+    const pend = (IX.encPonto.get(p.id)||[]).filter(e=>!e.concluido).map(e=>e.acao+(e.prazo?' (até '+fmt(e.prazo)+')':'')).join(' | ');
+    const d0 = dataReun(p.reuniao_origem);
+    return [p.codigo, ubsSigla(p.ubs_id), p.microarea, p.endereco, p.quarteirao, p.tipo, p.descricao, p.levantado_por, p.situacao,
+      fmt(d0), p.encerrado_em?fmt(p.encerrado_em):'', d0?dias(d0, p.encerrado_em||h):'', hist[0]?hist[0].feito:'', pend].map(q).join(';');
+  });
+  const blob = new Blob(['﻿' + [cab.map(q).join(';')].concat(linhas).join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pontos_matriciamento_${h}.csv`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ================= Ponto (histórico) ================= */
+function telaPonto(id){
+  const p = IX.ponto.get(id);
+  if(!p){ $('#app').innerHTML = '<div class="bloco"><div class="vazio">Ponto não encontrado. <a href="#/pontos">Voltar</a></div></div>'; return; }
+  const orig = IX.reun.get(p.reuniao_origem);
+  const eventos = [{d:orig?orig.data:'', r:orig, tipo:'origem'}]
+    .concat((IX.atualPonto.get(p.id)||[]).map(a=>({d:dataReun(a.reuniao_id), r:IX.reun.get(a.reuniao_id), tipo:'atual', a})))
+    .sort((x,y)=>(x.d||'').localeCompare(y.d||'') || (x.tipo==='origem'?-1:1));
+  const encs = (IX.encPonto.get(p.id)||[]).slice().sort((a,b)=>(dataReun(a.reuniao_id)||'').localeCompare(dataReun(b.reuniao_id)||''));
+  const linkR = r => r ? `<a href="#/reuniao/${r.id}">reunião${r.numero?' nº '+r.numero:''}</a>` : 'reunião';
+  $('#app').innerHTML = `
+    <div class="cab"><div><a href="#/pontos" class="lnk">← Pontos</a>
+      <h1 class="mono">${esc(p.codigo)}</h1><p>${sit(p.situacao)} <span class="mudo">· ${esc(ubsNome(p.ubs_id))}</span></p></div>
+      ${perfil.edita&&orig?'<div class="acoes"><button class="btn" id="b-ep">Editar ponto</button></div>':''}</div>
+    <section class="bloco"><div class="corpo"><div class="ident">
+      <div><span>Endereço</span><b>${esc(p.endereco||'—')}</b></div>
+      <div><span>Quarteirão</span><b class="mono">${esc(p.quarteirao||'—')}</b></div>
+      <div><span>Microárea</span><b class="mono">${esc(p.microarea||'—')}</b></div>
+      <div><span>Tipo</span><b>${esc(p.tipo||'—')}</b></div>
+      <div><span>Levantado por</span><b>${esc(p.levantado_por||'—')}</b></div>
+      <div><span>${p.encerrado_em?'Encerrado em':'Em aberto há'}</span><b class="mono">${p.encerrado_em?fmt(p.encerrado_em):(orig?dias(orig.data,hoje())+' dias':'—')}</b></div>
+    </div><p style="margin:14px 0 0">${esc(p.descricao)}</p></div></section>
+    <section class="bloco"><div class="tit"><h2>Histórico nas reuniões</h2></div><div class="corpo">
+      <ul class="linha-tempo">${eventos.map(ev => `<li><div class="dt">${fmt(ev.d)}</div><div class="ev">
+        ${ev.tipo==='origem' ? `<b>Levantado</b> na ${linkR(ev.r)}` : `${sit(ev.a.situacao)} na ${linkR(ev.r)}<p>${esc(ev.a.feito||'')}</p>`}
+      </div></li>`).join('')}</ul></div></section>
+    <section class="bloco"><div class="tit"><h2>Encaminhamentos</h2></div><div class="corpo sem">
+      ${encs.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Reunião</th><th>Encaminhamento</th><th>Responsável</th><th>Prazo</th><th>Concluído</th></tr></thead>
+      <tbody>${encs.map(e=>`<tr><td class="mono">${fmt(dataReun(e.reuniao_id))}</td><td>${esc(e.acao)}</td><td>${esc(e.responsavel||'—')}</td>
+        <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}</td><td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td></tr>`).join('')}</tbody></table></div>`
+      :'<div class="vazio">Nenhum encaminhamento.</div>'}</div></section>`;
+  const be = $('#b-ep'); if(be) be.onclick = () => formPonto(orig, p);
+}
+
+/* ================= Encaminhamentos ================= */
+function telaEncaminhamentos(){
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Encaminhamentos</h1><p class="mudo">Ações combinadas nas reuniões, por prazo. Os vencidos aparecem primeiro.</p></div></div>
+    <div class="filtros">${filtroUbs()}
+      <label>Responsável ou ação<input type="search" id="f-eb" value="${esc(F.eBusca)}" placeholder="Buscar…"></label>
+      <label class="chk"><input type="checkbox" id="f-conc" ${F.eConc?'checked':''}> Mostrar concluídos</label></div>
+    <div class="bloco"><div class="corpo sem" id="lista-enc"></div></div>`;
+  const desenhar = () => {
+    const b = F.eBusca.toLowerCase(), h = hoje();
+    const lista = D.enc.filter(e => { const p = IX.ponto.get(e.ponto_id); return p &&
+      (!F.ubs || String(p.ubs_id)===String(F.ubs)) && (F.eConc || !e.concluido) &&
+      (!b || [e.acao,e.responsavel,p.codigo].some(x=>String(x||'').toLowerCase().includes(b))); })
+      .sort((a,c) => (a.concluido-c.concluido) || (vencido(c)-vencido(a)) || String(a.prazo||'9999').localeCompare(String(c.prazo||'9999')));
+    $('#lista-enc').innerHTML = lista.length ? `<div class="tab-wrap"><table class="t">
+      <thead><tr><th>Prazo</th><th>Ponto</th><th>UBS</th><th>Encaminhamento</th><th>Responsável</th><th>Reunião</th><th>Concluído</th>${perfil.edita?'<th class="acao"></th>':''}</tr></thead>
+      <tbody>${lista.map(e => { const p = IX.ponto.get(e.ponto_id); return `<tr>
+        <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}${vencido(e)?`<div class="sub venc">${dias(e.prazo,h)} dia(s) de atraso</div>`:''}</td>
+        <td class="cod"><a href="#/ponto/${p.id}">${esc(p.codigo)}</a></td><td>${esc(ubsSigla(p.ubs_id))}</td>
+        <td>${esc(e.acao)}<div class="sub">${esc(p.descricao.slice(0,90))}</div></td><td>${esc(e.responsavel||'—')}</td>
+        <td class="mono"><a href="#/reuniao/${e.reuniao_id}">${fmt(dataReun(e.reuniao_id))}</a></td>
+        <td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td>
+        ${perfil.edita?`<td class="acao"><button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button></td>`:''}</tr>`; }).join('')}</tbody></table></div>`
+      : '<div class="vazio">Nenhum encaminhamento com estes filtros.</div>';
+    document.querySelectorAll('#lista-enc [data-conc]').forEach(bt => bt.onclick = async () => {
+      const e = D.enc.find(x=>x.id===bt.dataset.conc); bt.disabled = true;
+      try{ await alterar('matric_encaminhamentos', e.id, {concluido:!e.concluido}); await carregar(); desenhar(); aviso(e.concluido?'Reaberto.':'Concluído.'); }
+      catch(er){ aviso(er.message, true); bt.disabled = false; }
+    });
+  };
+  $('#f-ubs').onchange = e => { F.ubs = e.target.value; desenhar(); };
+  $('#f-eb').oninput = e => { F.eBusca = e.target.value; desenhar(); };
+  $('#f-conc').onchange = e => { F.eConc = e.target.checked; desenhar(); };
+  desenhar();
+}
+
+/* ================= Agenda ================= */
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const vistaUbs = id => !F.gUbs || (F.gUbs==='0' ? !id : (!id || String(id)===String(F.gUbs)));
+function eventos(){
+  const ev = [], h = hoje();
+  for(const r of D.reunioes) if(vistaUbs(r.ubs_id))
+    ev.push({data:r.data, cls:'ev-reuniao', titulo:`Reunião ${ubsSigla(r.ubs_id)}`, sub:'Ata registrada', hora:r.hora_inicio, href:'#/reuniao/'+r.id, ordem:1, k:'reuniao'});
+  for(const g of D.agenda){
+    if(!vistaUbs(g.ubs_id) || (g.situacao==='Realizada' && g.reuniao_id && IX.reun.get(g.reuniao_id))) continue;
+    const reun = g.tipo==='Reunião';
+    ev.push({data:g.data, cls:(reun?'ev-agendada':'ev-acao') + (g.situacao==='Cancelada'?' ev-cancelada':''), hora:g.hora,
+      titulo: reun ? `Reunião ${ubsSigla(g.ubs_id)}` : (g.titulo || 'Ação') + (g.ubs_id?` · ${ubsSigla(g.ubs_id)}`:''),
+      sub: [reun ? 'Reunião agendada' : 'Ação', g.situacao!=='Agendada'?g.situacao:'', g.local, g.responsaveis].filter(Boolean).join(' · '), agenda:g, ordem:0, k: reun ? 'reuniao' : 'acao'});
+  }
+  for(const e of D.enc){ const p = IX.ponto.get(e.ponto_id); if(!e.prazo || !p || !vistaUbs(p.ubs_id)) continue;
+    ev.push({data:e.prazo, cls: e.concluido?'ev-feito':(e.prazo<h?'ev-vencido':'ev-prazo'), titulo:`Prazo: ${e.acao}`, sub:`${p.codigo} · ${e.responsavel||'sem responsável'}${e.concluido?' · concluído':e.prazo<h?' · vencido':''}`, href:'#/ponto/'+p.id, ordem:2, k:'prazo'}); }
+  for(const k of D.pact){ if(k.situacao==='Encerrada' || !k.revisar_em || !vistaUbs(k.ubs_id)) continue;
+    ev.push({data:k.revisar_em, cls:'ev-revisao', titulo:`Revisar pactuação${k.tema?': '+k.tema:''}`, sub:k.ubs_id?ubsSigla(k.ubs_id):'Todas as UBS', href:'#/pactuacoes', ordem:3, k:'revisao'}); }
+  return ev.filter(e => F.gTipos[e.k]).sort((a,b)=>a.data.localeCompare(b.data) || a.ordem-b.ordem || String(a.hora||'').localeCompare(String(b.hora||'')));
+}
+function telaAgenda(){
+  const h = hoje(); if(!F.gMes) F.gMes = h.slice(0,7); if(!F.gDia) F.gDia = h;
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Agenda</h1><p class="mudo">Reuniões realizadas e agendadas, ações e prazos dos encaminhamentos.</p></div>
+      <div class="acoes"><button class="btn" id="b-ics" title="Baixar os próximos compromissos para o Google Agenda ou Outlook">Exportar (.ics)</button>${perfil.edita?'<button class="btn prim" id="b-ag">+ Agendar</button>':''}</div></div>
+    <div class="filtros">
+      <label>UBS<select id="fg-ubs">${opts([{v:'0',t:'Só as de todas as UBS'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), F.gUbs, 'Todas')}</select></label>
+      <label class="chk"><input type="checkbox" data-gt="reuniao" ${F.gTipos.reuniao?'checked':''}> Reuniões</label>
+      <label class="chk"><input type="checkbox" data-gt="acao" ${F.gTipos.acao?'checked':''}> Ações</label>
+      <label class="chk"><input type="checkbox" data-gt="prazo" ${F.gTipos.prazo?'checked':''}> Prazos</label>
+      <label class="chk"><input type="checkbox" data-gt="revisao" ${F.gTipos.revisao?'checked':''}> Revisões</label>
+      <div class="acoes" style="margin-left:auto"><button class="btn" id="g-ant">‹</button><b id="g-tit" style="min-width:150px;text-align:center;text-transform:capitalize"></b><button class="btn" id="g-prox">›</button><button class="btn" id="g-hoje">Hoje</button></div></div>
+    <section class="bloco"><div id="cal"></div>
+      <div class="legenda"><span><span class="ev ev-agendada">Reunião agendada</span></span><span><span class="ev ev-reuniao">Reunião com ata</span></span><span><span class="ev ev-acao">Ação</span></span><span><span class="ev ev-prazo">Prazo</span></span><span><span class="ev ev-vencido">Prazo vencido</span></span><span><span class="ev ev-feito">Concluído</span></span><span><span class="ev ev-revisao">Revisão de pactuação</span></span></div></section>
+    <section class="bloco"><div class="tit"><h2 id="dia-tit"></h2>${perfil.edita?'<button class="btn" id="b-agdia">+ Agendar neste dia</button>':''}</div><div class="corpo sem" id="dia-lista"></div></section>
+    <section class="bloco"><div class="tit"><div><h2>Próximos 30 dias</h2><p class="mudo" id="prox-nota"></p></div></div><div class="corpo sem" id="prox-lista"></div></section>`;
+  const listaHTML = evs => evs.length ? `<ul class="lista-ev">${evs.map((e,i)=>`<li><div class="dt">${fmt(e.data)}${e.hora?'<br>'+esc(e.hora):''}</div>
+      <div><span class="ev ${e.cls}" style="display:inline-block;max-width:100%">${esc(e.titulo)}</span><div class="sub" style="margin-top:3px">${esc(e.sub||'')}</div></div>
+      <div>${e.agenda ? `<button class="btn mini" data-evi="${i}">${perfil.edita?'Abrir':'Ver'}</button>` : `<a class="btn mini" href="${e.href}" style="text-decoration:none">Abrir</a>`}</div></li>`).join('')}</ul>` : '<div class="vazio">Nada marcado.</div>';
+  const ligarLista = (sel, evs) => document.querySelectorAll(sel+' [data-evi]').forEach(b => b.onclick = () => abrirAgenda(evs[Number(b.dataset.evi)].agenda));
+  const desenhar = () => {
+    const evs = eventos(), porDia = new Map();
+    for(const e of evs){ if(!porDia.has(e.data)) porDia.set(e.data, []); porDia.get(e.data).push(e); }
+    const [a, m] = F.gMes.split('-').map(Number), ini = new Date(a, m-1, 1), ini0 = new Date(a, m-1, 1 - ini.getDay());
+    $('#g-tit').textContent = `${MESES[m-1]} ${a}`;
+    let html = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="dsem">${d}</div>`).join('');
+    for(let i=0;i<42;i++){
+      const d = new Date(ini0.getFullYear(), ini0.getMonth(), ini0.getDate()+i), iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if(i>=35 && d.getMonth()!==m-1) break;
+      const lst = porDia.get(iso)||[];
+      html += `<div class="dia ${d.getMonth()!==m-1?'fora':''} ${iso===h?'hoje':''} ${iso===F.gDia?'sel':''}" data-dia="${iso}"><span class="n">${d.getDate()}</span>
+        ${lst.slice(0,3).map(e=>`<div class="ev ${e.cls}" title="${esc(e.titulo+' — '+(e.sub||''))}">${esc(e.titulo)}</div>`).join('')}${lst.length>3?`<div class="ev mais" style="border:0">+${lst.length-3}</div>`:''}</div>`;
+    }
+    $('#cal').innerHTML = `<div class="cal">${html}</div>`;
+    document.querySelectorAll('.dia[data-dia]').forEach(c => c.onclick = () => { F.gDia = c.dataset.dia; desenhar(); });
+    const doDia = porDia.get(F.gDia)||[];
+    $('#dia-tit').textContent = new Date(F.gDia+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long', day:'2-digit', month:'long'});
+    $('#dia-lista').innerHTML = listaHTML(doDia); ligarLista('#dia-lista', doDia);
+    const lim = new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+    const futuros = evs.filter(e => e.data>=h && e.data<=lim && !/ev-feito|ev-reuniao|ev-cancelada/.test(e.cls));
+    const prox = futuros.filter(e => e.k!=='prazo'), nPrazos = futuros.length - prox.length;
+    $('#prox-nota').innerHTML = nPrazos ? `Reuniões, ações e revisões. Há também ${nPrazos} prazo(s) de encaminhamento no período: veja no calendário ou em <a href="#/encaminhamentos">Encaminhamentos</a>.` : 'Reuniões, ações e revisões.';
+    $('#prox-lista').innerHTML = listaHTML(prox); ligarLista('#prox-lista', prox);
+  };
+  const mudarMes = d => { const [a,m] = F.gMes.split('-').map(Number), n = new Date(a, m-1+d, 1); F.gMes = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; desenhar(); };
+  $('#g-ant').onclick = () => mudarMes(-1); $('#g-prox').onclick = () => mudarMes(1);
+  $('#g-hoje').onclick = () => { F.gMes = h.slice(0,7); F.gDia = h; desenhar(); };
+  $('#fg-ubs').onchange = e => { F.gUbs = e.target.value; desenhar(); };
+  document.querySelectorAll('[data-gt]').forEach(c => c.onchange = () => { F.gTipos[c.dataset.gt] = c.checked; desenhar(); });
+  $('#b-ics').onclick = exportarICS;
+  if(perfil.edita){ $('#b-ag').onclick = () => formAgenda(null, F.gDia >= h ? F.gDia : h); $('#b-agdia').onclick = () => formAgenda(null, F.gDia); }
+  desenhar();
+}
+function abrirAgenda(g){
+  if(perfil.edita) return formAgenda(g);
+  modal(g.tipo==='Reunião' ? `Reunião ${ubsSigla(g.ubs_id)}` : (g.titulo||'Ação'), `
+    <div class="ident"><div><span>Data</span><b class="mono">${fmt(g.data)}${g.hora?' · '+esc(g.hora):''}</b></div><div><span>UBS</span><b>${g.ubs_id?esc(ubsNome(g.ubs_id)):'Todas'}</b></div>
+      <div><span>Local</span><b>${esc(g.local||'—')}</b></div><div><span>Situação</span><b>${esc(g.situacao)}</b></div><div><span>Responsáveis</span><b>${esc(g.responsaveis||'—')}</b></div></div>
+    ${g.descricao?`<p style="margin:0;white-space:pre-wrap">${esc(g.descricao)}</p>`:''}`, null);
+}
+function formAgenda(g, dataPadrao){
+  const tipo0 = g ? g.tipo : 'Reunião';
+  const form = modal(g ? (g.tipo==='Reunião'?'Reunião agendada':'Ação agendada') : 'Agendar', `
+    <div class="grade3">
+      <label class="campo"><span>Tipo *</span><select name="tipo" required ${g?'disabled':''}>${opts([{v:'Reunião',t:'Reunião de matriciamento'},{v:'Ação',t:'Ação (mutirão, visita conjunta…)'}], tipo0)}</select></label>
+      <label class="campo"><span>Data *</span><input type="date" name="data" required value="${esc(g?g.data:(dataPadrao||hoje()))}"></label>
+      <label class="campo"><span>Horário</span><input type="text" name="hora" placeholder="hh:mm" value="${esc(g?g.hora:'')}"></label>
+    </div>
+    <div class="grade2">
+      <label class="campo"><span>UBS <span id="ubs-obr">*</span></span><select name="ubs_id">${opts([{v:'0',t:'Todas as UBS'}].concat(D.ubs.filter(u=>u.ativa||(g&&g.ubs_id===u.id)).map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), g?(g.ubs_id??'0'):(F.gUbs&&F.gUbs!=='0'?F.gUbs:''), 'Selecione')}</select></label>
+      <label class="campo"><span>Local</span><input type="text" name="local" value="${esc(g?g.local:'')}"></label>
+    </div>
+    <label class="campo" id="c-titulo"><span>Ação *</span><input type="text" name="titulo" value="${esc(g?g.titulo:'')}" placeholder="Ex.: Mutirão de limpeza no bairro"></label>
+    <label class="campo"><span id="l-desc">Pauta / observações</span><textarea name="descricao" rows="3">${esc(g?g.descricao:'')}</textarea></label>
+    <div class="grade2">
+      <label class="campo"><span>Responsáveis</span><input type="text" name="responsaveis" value="${esc(g?g.responsaveis:'')}"></label>
+      ${g?`<label class="campo"><span>Situação</span><select name="situacao">${opts(['Agendada','Realizada','Cancelada'], g.situacao)}</select></label>`:'<div></div>'}
+    </div>
+    ${g && g.tipo==='Reunião' && g.situacao==='Agendada' ? `<div class="info">Quando a reunião acontecer, use <b>Registrar ata</b>: a ata abre já com a UBS, a data e o local.</div>` : ''}
+    ${g && g.reuniao_id && IX.reun.get(g.reuniao_id) ? `<a href="#/reuniao/${g.reuniao_id}" class="lnk" data-fechar>Abrir a ata desta reunião</a>` : ''}
+    ${g?'<div class="acoes"><button type="button" class="lnk" id="b-delag" style="color:var(--vencido)">Excluir</button>'+(g.tipo==='Reunião'&&g.situacao==='Agendada'?'<button type="button" class="btn" id="b-ata" style="margin-left:auto">Registrar ata</button>':'')+'</div>':''}`,
+    async f => {
+      const tipo = g ? g.tipo : f.tipo.value, u = f.ubs_id.value;
+      if(tipo==='Reunião' && (!u || u==='0')) throw new Error('Escolha a UBS da reunião.');
+      if(tipo==='Ação' && !val(f,'titulo')) throw new Error('Descreva a ação.');
+      if(!u) throw new Error('Escolha a UBS ou "Todas as UBS".');
+      const linha = {data:f.data.value, hora:val(f,'hora'), ubs_id:u==='0'?null:Number(u), local:val(f,'local'),
+        titulo: tipo==='Reunião' ? 'Reunião de matriciamento' : val(f,'titulo'), descricao:val(f,'descricao'), responsaveis:val(f,'responsaveis')};
+      if(g){ linha.situacao = f.situacao.value; await alterar('matric_agenda', g.id, linha); }
+      else await inserir('matric_agenda', {...linha, tipo});
+      F.gMes = linha.data.slice(0,7); F.gDia = linha.data;
+      await recarregar(g ? 'Agendamento atualizado.' : 'Agendado.');
+    }, {largura:720});
+  const ajustar = () => { const reun = (g?g.tipo:form.tipo.value)==='Reunião';
+    form.querySelector('#c-titulo').style.display = reun ? 'none' : '';
+    form.querySelector('#l-desc').textContent = reun ? 'Pauta / observações' : 'Detalhes';
+    form.querySelector('#ubs-obr').textContent = reun ? '*' : '(ou todas)'; };
+  if(!g) form.tipo.onchange = ajustar; ajustar();
+  const fechar = () => { const fu = document.querySelector('.fundo'); if(fu) fu.remove(); };
+  form.querySelectorAll('[data-fechar]').forEach(a => a.addEventListener('click', fechar));
+  const bd = form.querySelector('#b-delag');
+  if(bd) bd.onclick = () => { fechar(); confirmar('Excluir agendamento', `Excluir ${g.tipo==='Reunião'?'a reunião agendada':'a ação'} de <b>${fmt(g.data)}</b>? Para manter o registro, prefira mudar a situação para Cancelada.`,
+    async () => { await excluir('matric_agenda', g.id); await recarregar('Agendamento excluído.'); }); };
+  const ba = form.querySelector('#b-ata');
+  if(ba) ba.onclick = () => { fechar(); novaReuniao({ubs_id:g.ubs_id, data:g.data, local:g.local, hora:g.hora}); };
+}
+function exportarICS(){
+  const h = hoje(), evs = eventos().filter(e => e.data>=h && !/ev-feito|ev-reuniao|ev-cancelada/.test(e.cls));
+  if(!evs.length) return aviso('Não há compromissos futuros para exportar.', true);
+  const limpa = t => String(t||'').replace(/\\/g,'\\\\').replace(/[,;]/g, m=>'\\'+m).replace(/\r?\n/g,'\\n');
+  const carimbo = new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const linhas = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Paulinia//Matriciamento ACS ACV//PT','CALSCALE:GREGORIAN'];
+  evs.forEach((e,i) => {
+    const d = e.data.replace(/-/g,''), hm = /^(\d{1,2}):(\d{2})$/.exec(String(e.hora||'').trim());
+    linhas.push('BEGIN:VEVENT', `UID:matric-${d}-${i}-${Math.random().toString(36).slice(2,8)}@paulinia`, `DTSTAMP:${carimbo}`);
+    if(hm){ const ini = `${d}T${hm[1].padStart(2,'0')}${hm[2]}00`; const fimH = String(Math.min(23, Number(hm[1])+2)).padStart(2,'0');
+      linhas.push(`DTSTART;TZID=America/Sao_Paulo:${ini}`, `DTEND;TZID=America/Sao_Paulo:${d}T${fimH}${hm[2]}00`); }
+    else { const n = new Date(e.data+'T12:00:00'); n.setDate(n.getDate()+1);
+      linhas.push(`DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${n.toISOString().slice(0,10).replace(/-/g,'')}`); }
+    linhas.push(`SUMMARY:${limpa(e.titulo)}`, `DESCRIPTION:${limpa(e.sub)}`);
+    if(e.agenda && e.agenda.local) linhas.push(`LOCATION:${limpa(e.agenda.local)}`);
+    linhas.push('END:VEVENT');
+  });
+  linhas.push('END:VCALENDAR');
+  const blob = new Blob([linhas.join('\r\n')], {type:'text/calendar;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `agenda_matriciamento_${h}.ics`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ================= Pactuações ================= */
+const SIT_PACT = ['Vigente','Em revisão','Encerrada'];
+const TEMAS_PACT = ['Fluxo de comunicação ACS × ACV','Visitas conjuntas','Imóveis fechados e recusas','Acumuladores','Pontos estratégicos','Bloqueio de casos','Mutirões e ações de limpeza','Educação em saúde','Outro'];
+function sitPact(sx){ const c = {'Vigente':'resolvido','Em revisão':'aguardando','Encerrada':'encerrado'}[sx]||'encerrado'; return `<span class="sit sit-${c}">${esc(sx)}</span>`; }
+const revisaoVencida = k => k.situacao!=='Encerrada' && k.revisar_em && k.revisar_em < hoje();
+function tabelaPact(lista, ed, mostrarUbs){
+  if(!lista.length) return '<div class="vazio">Nenhuma pactuação.</div>';
+  return `<div class="tab-wrap"><table class="t"><thead><tr><th>Data</th>${mostrarUbs?'<th>UBS</th>':''}<th>Tema</th><th>Pactuação</th><th>Responsáveis</th><th>Revisar em</th><th>Situação</th>${ed?'<th class="acao"></th>':''}</tr></thead>
+    <tbody>${lista.map(k => `<tr>
+      <td class="mono">${fmt(k.data)}${k.reuniao_id && IX.reun.get(k.reuniao_id) && mostrarUbs ? `<div class="sub"><a href="#/reuniao/${k.reuniao_id}">ata</a></div>`:''}</td>
+      ${mostrarUbs?`<td>${k.ubs_id?esc(ubsSigla(k.ubs_id)):'<b>Todas</b>'}</td>`:''}
+      <td>${esc(k.tema||'—')}</td>
+      <td style="white-space:pre-wrap">${esc(k.descricao)}${k.observacao?`<div class="sub">${esc(k.observacao)}</div>`:''}</td>
+      <td>${esc(k.responsaveis||'—')}</td>
+      <td class="mono ${revisaoVencida(k)?'venc':''}">${fmt(k.revisar_em)}</td>
+      <td>${sitPact(k.situacao)}</td>
+      ${ed?`<td class="acao"><button class="btn mini" data-epact="${k.id}">Editar</button></td>`:''}</tr>`).join('')}</tbody></table></div>`;
+}
+function ligarPact(ed){
+  if(!ed) return;
+  document.querySelectorAll('[data-epact]').forEach(b => b.onclick = () => { const k = D.pact.find(x=>x.id===b.dataset.epact); formPact(k, k.reuniao_id ? IX.reun.get(k.reuniao_id) : null); });
+}
+function formPact(k, R){
+  const ubsPadrao = k ? (k.ubs_id ?? '0') : (R ? R.ubs_id : (F.kUbs && F.kUbs!=='0' ? F.kUbs : ''));
+  modal(k?'Editar pactuação':'Nova pactuação', `
+    ${R?`<div class="info">Reunião de <b>${fmt(R.data)}</b> · ${esc(ubsNome(R.ubs_id))}</div>`:''}
+    <div class="grade2">
+      <label class="campo"><span>Vale para *</span><select name="ubs_id" required>${opts([{v:'0',t:'Todas as UBS'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), ubsPadrao, 'Selecione')}</select></label>
+      <label class="campo"><span>Data *</span><input type="date" name="data" required value="${esc(k?k.data:(R?R.data:hoje()))}"></label>
+    </div>
+    <label class="campo"><span>Tema</span><input type="text" name="tema" list="temas-pact" value="${esc(k?k.tema:'')}" placeholder="Escolha ou digite">
+      <datalist id="temas-pact">${TEMAS_PACT.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></label>
+    <label class="campo"><span>O que foi pactuado *</span><textarea name="descricao" rows="4" required>${esc(k?k.descricao:'')}</textarea></label>
+    <div class="grade3">
+      <label class="campo"><span>Responsáveis</span><input type="text" name="responsaveis" value="${esc(k?k.responsaveis:'')}" placeholder="Ex.: ACS e ACV da área"></label>
+      <label class="campo"><span>Revisar em</span><input type="date" name="revisar_em" value="${esc(k?k.revisar_em||'':'')}"></label>
+      <label class="campo"><span>Situação</span><select name="situacao">${opts(SIT_PACT, k?k.situacao:'Vigente')}</select></label>
+    </div>
+    <label class="campo"><span>Observação</span><input type="text" name="observacao" value="${esc(k?k.observacao:'')}" placeholder="Ex.: substituída pela pactuação de 10/03"></label>
+    ${k?'<button type="button" class="lnk" id="b-delpact" style="justify-self:start;color:var(--vencido)">Excluir esta pactuação</button>':''}`,
+    async f => {
+      const linha = {ubs_id: f.ubs_id.value==='0' ? null : Number(f.ubs_id.value), data:f.data.value, tema:val(f,'tema'), descricao:val(f,'descricao'),
+        responsaveis:val(f,'responsaveis'), revisar_em:val(f,'revisar_em'), situacao:f.situacao.value, observacao:val(f,'observacao')};
+      if(k) await alterar('matric_pactuacoes', k.id, linha);
+      else await inserir('matric_pactuacoes', {...linha, reuniao_id: R ? R.id : null});
+      await recarregar(k?'Pactuação atualizada.':'Pactuação registrada.');
+    }, {largura:720});
+  const bd = $('#b-delpact');
+  if(bd) bd.onclick = async () => {
+    try{ await excluir('matric_pactuacoes', k.id); document.querySelector('.fundo').remove(); await recarregar('Pactuação excluída.'); }
+    catch(e){ aviso(e.message, true); }
+  };
+}
+function telaPactuacoes(){
+  const sitOpts = [{v:'ativas',t:'Vigentes e em revisão'},{v:'Vigente',t:'Vigentes'},{v:'Em revisão',t:'Em revisão'},{v:'Encerrada',t:'Encerradas'},{v:'todas',t:'Todas'}];
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Pactuações</h1><p class="mudo">Combinados firmados entre ACS e ACV, por UBS ou para todas as UBS.</p></div>
+      <div class="acoes"><button class="btn" id="b-imp">Imprimir</button>${perfil.edita?'<button class="btn prim" id="b-npact">+ Pactuação</button>':''}</div></div>
+    <div class="ata-cab"><b>Pactuações do Matriciamento ACS × ACV</b><span>Prefeitura Municipal de Paulínia · Vigilância em Saúde · Divisão de Controle de Vetores · ${fmt(hoje())}</span></div>
+    <div class="filtros nao-imprime">
+      <label>UBS<select id="fk-ubs">${opts([{v:'0',t:'Só as de todas as UBS'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), F.kUbs, 'Todas')}</select></label>
+      <label>Situação<select id="fk-sit">${opts(sitOpts, F.kSit)}</select></label>
+      <label>Buscar<input type="search" id="fk-busca" value="${esc(F.kBusca)}" placeholder="Tema, texto, responsável…"></label></div>
+    <p class="mudo nao-imprime" style="font-size:12px;margin:-6px 0 12px">Ao filtrar uma UBS, aparecem também as pactuações que valem para todas.</p>
+    <div class="bloco"><div class="corpo sem" id="lista-pact"></div></div>`;
+  const desenhar = () => {
+    const b = F.kBusca.toLowerCase();
+    const lista = D.pact.filter(k =>
+      (!F.kUbs || (F.kUbs==='0' ? !k.ubs_id : (!k.ubs_id || String(k.ubs_id)===String(F.kUbs)))) &&
+      (F.kSit==='todas' || (F.kSit==='ativas' ? k.situacao!=='Encerrada' : k.situacao===F.kSit)) &&
+      (!b || [k.tema,k.descricao,k.responsaveis,k.observacao].some(x=>String(x||'').toLowerCase().includes(b)))
+    ).sort((a,c) => (revisaoVencida(c)-revisaoVencida(a)) || c.data.localeCompare(a.data));
+    const venc = lista.filter(revisaoVencida).length;
+    $('#lista-pact').innerHTML = tabelaPact(lista, perfil.edita, true) +
+      (lista.length ? `<div class="vazio" style="border-top:1px solid var(--linha2)">${lista.length} pactuação(ões)${venc?` · <span class="venc">${venc} com revisão vencida</span>`:''}</div>` : '');
+    ligarPact(perfil.edita);
+  };
+  $('#fk-ubs').onchange = e => { F.kUbs = e.target.value; desenhar(); };
+  $('#fk-sit').onchange = e => { F.kSit = e.target.value; desenhar(); };
+  $('#fk-busca').oninput = e => { F.kBusca = e.target.value; desenhar(); };
+  $('#b-imp').onclick = () => window.print();
+  const bn = $('#b-npact'); if(bn) bn.onclick = () => formPact(null, null);
+  desenhar();
+}
+
+/* ================= Administração ================= */
+function telaAdmin(){
+  if(!perfil.admin){ location.hash = '#/painel'; return; }
+  $('#app').innerHTML = `
+    <div class="cab"><div><h1>Administração</h1><p class="mudo">Cadastro das UBS e de quem acessa as atas.</p></div></div>
+    <section class="bloco"><div class="tit"><div><h2>UBS</h2><p class="mudo">A sigla entra no código dos pontos e não pode ser alterada depois do primeiro ponto.</p></div>
+      <button class="btn prim" id="b-nubs">+ UBS</button></div>
+      <div class="corpo sem">${D.ubs.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Sigla</th><th>Nome</th><th class="num">Reuniões</th><th class="num">Pontos</th><th>Ativa</th><th class="acao"></th></tr></thead>
+      <tbody>${D.ubs.map(u=>`<tr><td class="cod">${esc(u.sigla)}</td><td>${esc(u.nome)}</td>
+        <td class="num mono">${D.reunioes.filter(r=>r.ubs_id===u.id).length}</td><td class="num mono">${D.pontos.filter(p=>p.ubs_id===u.id).length}</td>
+        <td>${u.ativa?'Sim':'<span class="mudo">Não</span>'}</td><td class="acao"><button class="btn mini" data-eubs="${u.id}">Editar</button></td></tr>`).join('')}</tbody></table></div>`
+      :'<div class="vazio">Nenhuma UBS cadastrada.</div>'}</div></section>
+    <section class="bloco"><div class="tit"><div><h2>Acesso</h2><p class="mudo">Edição: conduz as reuniões e vê todas as UBS. Consulta: só vê as UBS marcadas para ela. Você, como administrador, sempre edita.</p></div>
+      <div class="acoes"><button class="btn" id="b-colac">Colar lista</button><button class="btn prim" id="b-nac">+ Pessoa</button></div></div>
+      <div class="corpo sem">${D.acesso.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>E-mail</th><th>Nome</th><th>Função</th><th>Perfil</th><th>UBS que vê</th><th class="acao"></th></tr></thead>
+      <tbody>${D.acesso.map(a=>`<tr><td class="mono">${esc(a.email)}</td><td>${esc(a.nome||'—')}</td><td>${esc(a.funcao||'—')}</td>
+        <td>${a.edita?'<b>Edição</b>':'Consulta'}</td>
+        <td>${a.edita?'Todas':(a.ubs_ids||[]).length?esc(a.ubs_ids.map(ubsSigla).join(', ')):'<span class="venc">Nenhuma</span>'}</td><td class="acao"><button class="btn mini" data-eac="${esc(a.email)}">Editar</button></td></tr>`).join('')}</tbody></table></div>`
+      :'<div class="vazio">Ninguém na lista ainda. Inclua os e-mails de ACS, ACV e supervisores.</div>'}</div></section>
+    <section class="bloco"><div class="tit"><div><h2>Agentes</h2><p class="mudo">ACS, ACV e demais profissionais que aparecem para marcar presença nas reuniões.</p></div>
+      <div class="acoes"><button class="btn" id="b-colar">Colar lista</button><button class="btn prim" id="b-nag">+ Agente</button></div></div>
+      <div class="corpo" style="padding-bottom:0"><div class="filtros" style="margin:0">
+        <label>UBS<select id="fa-ubs">${opts([{v:'0',t:'Sem UBS (ACV, supervisão)'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), F.aUbs||'', 'Todas')}</select></label>
+        <label>Função<select id="fa-fun">${opts(FUNCOES, F.aFun||'', 'Todas')}</select></label>
+        <label class="chk"><input type="checkbox" id="fa-in" ${F.aIn?'checked':''}> Mostrar inativos</label></div></div>
+      <div class="corpo sem" id="lista-agentes"></div></section>
+    <p class="mudo" style="font-size:12px">Cada pessoa cria a própria senha em "Primeiro acesso", com o e-mail cadastrado aqui. Quem já usa o painel de dengue entra com a mesma senha.</p>`;
+  const desenharAg = () => {
+    const lista = D.agentes.filter(g => (F.aIn || g.ativo) && (!F.aFun || g.funcao===F.aFun) &&
+      (!F.aUbs || (F.aUbs==='0' ? !ubsDoAgente(g).length : atende(g, Number(F.aUbs)))))
+      .sort((a,b) => siglasAgente(a).localeCompare(siglasAgente(b)) || a.funcao.localeCompare(b.funcao) || ordemAgente(a,b));
+    $('#lista-agentes').innerHTML = lista.length ? `<div class="tab-wrap"><table class="t"><thead><tr><th>Nome</th><th>Função</th><th>UBS</th><th>Equipe</th><th>Microárea</th><th>Ativo</th><th class="acao"></th></tr></thead>
+      <tbody>${lista.map(g=>`<tr><td>${esc(g.nome)}</td><td>${esc(g.funcao)}</td><td>${ubsDoAgente(g).length?esc(siglasAgente(g)):'<span class="mudo">—</span>'}</td>
+        <td>${esc(g.equipe||'—')}</td><td class="mono">${esc(g.microarea||'—')}</td><td>${g.ativo?'Sim':'<span class="mudo">Não</span>'}</td>
+        <td class="acao"><button class="btn mini" data-eag="${g.id}">Editar</button></td></tr>`).join('')}</tbody></table></div>
+      <div class="vazio" style="border-top:1px solid var(--linha2)">${lista.length} agente(s)</div>` : '<div class="vazio">Nenhum agente com estes filtros.</div>';
+    document.querySelectorAll('[data-eag]').forEach(b => b.onclick = () => formAgente(IX.agente.get(Number(b.dataset.eag))));
+  };
+  $('#fa-ubs').onchange = e => { F.aUbs = e.target.value; desenharAg(); };
+  $('#fa-fun').onchange = e => { F.aFun = e.target.value; desenharAg(); };
+  $('#fa-in').onchange = e => { F.aIn = e.target.checked; desenharAg(); };
+  $('#b-nag').onclick = () => formAgente(null);
+  $('#b-colar').onclick = colarAgentes;
+  desenharAg();
+  $('#b-nubs').onclick = () => formUbs(null);
+  $('#b-nac').onclick = () => formAcesso(null);
+  document.querySelectorAll('[data-eubs]').forEach(b => b.onclick = () => formUbs(IX.ubs.get(Number(b.dataset.eubs))));
+  $('#b-colac').onclick = colarAcessos;
+  document.querySelectorAll('[data-eac]').forEach(b => b.onclick = () => formAcesso(D.acesso.find(a=>a.email===b.dataset.eac)));
+}
+function formUbs(u){
+  const temPontos = u && D.pontos.some(p=>p.ubs_id===u.id);
+  modal(u?'Editar UBS':'Nova UBS', `
+    <div class="grade2">
+      <label class="campo"><span>Sigla *</span><input type="text" name="sigla" required maxlength="10" value="${esc(u?u.sigla:'')}" ${temPontos?'disabled':''} style="text-transform:uppercase" placeholder="Ex.: UBSC">
+        <small>2 a 10 letras ou números, sem espaço</small></label>
+      <label class="campo"><span>Nome *</span><input type="text" name="nome" required value="${esc(u?u.nome:'')}"></label>
+    </div>
+    ${u?`<label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="ativa" ${u.ativa?'checked':''} style="width:auto"> UBS ativa (aparece no painel e em novas reuniões)</label>`:''}`,
+    async f => {
+      const linha = {nome:val(f,'nome')};
+      if(!temPontos) linha.sigla = String(f.sigla.value).trim().toUpperCase().replace(/\s+/g,'');
+      if(u){ linha.ativa = f.ativa.checked; await alterar('matric_ubs', u.id, linha); }
+      else await inserir('matric_ubs', linha);
+      await recarregar('UBS salva.');
+    });
+}
+function formAgente(g){
+  modal(g?'Editar agente':'Novo agente', `
+    <div class="grade2">
+      <label class="campo"><span>Nome *</span><input type="text" name="nome" required value="${esc(g?g.nome:'')}"></label>
+      <label class="campo"><span>Função *</span><select name="funcao" required>${opts(FUNCOES, g?g.funcao:'ACS', 'Selecione')}</select></label>
+    </div>
+    <div class="campo"><span>UBS de referência <small>(ACS: uma só · ACV e supervisão: quantas atender, ou nenhuma)</small></span>
+      <div class="chips">${D.ubs.map(u => `<label class="chip"><input type="checkbox" name="ubs" value="${u.id}" ${(g ? ubsDoAgente(g) : (F.aUbs&&F.aUbs!=='0'?[Number(F.aUbs)]:[])).includes(u.id)?'checked':''}><span>${esc(u.nome)}<small>${esc(u.sigla)}</small></span></label>`).join('')}</div></div>
+    <div class="grade2">
+      <label class="campo"><span>Equipe</span><input type="text" name="equipe" value="${esc(g?g.equipe:'')}" placeholder="Ex.: Azul"></label>
+      <label class="campo"><span>Microárea</span><input type="text" name="microarea" value="${esc(g?g.microarea:'')}" placeholder="Ex.: Azul 1"></label>
+    </div>
+    ${g?`<label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="ativo" ${g.ativo?'checked':''} style="width:auto"> Ativo (aparece para marcar presença)</label>`:''}`,
+    async f => {
+      const sel = [...f.querySelectorAll('input[name=ubs]:checked')].map(x=>Number(x.value));
+      if(f.funcao.value==='ACS' && sel.length!==1) throw new Error('Marque exatamente uma UBS para o ACS.');
+      const linha = {nome:val(f,'nome'), funcao:f.funcao.value, ubs_id:f.funcao.value==='ACS'?sel[0]:null, ubs_ids:f.funcao.value==='ACS'?[]:sel, equipe:val(f,'equipe'), microarea:val(f,'microarea')};
+      if(g){ linha.ativo = f.ativo.checked; await alterar('matric_agentes', g.id, linha); }
+      else await inserir('matric_agentes', linha);
+      await recarregar('Agente salvo.');
+    }, {largura:680});
+}
+function colarAgentes(){
+  const form = modal('Colar lista de agentes', `
+    <div class="info">Uma pessoa por linha, separando com ponto e vírgula (ou colando colunas do Excel):<br>
+      <span class="mono">Nome; Função; Sigla da UBS; Equipe; Microárea</span><br>
+      Ex.: <span class="mono">Maria Souza; ACS; CENTRO; Azul; Azul 1</span> · <span class="mono">João Lima; ACV; BETEL, CENTRO</span><br>
+      ACV e supervisão podem ter várias UBS, separadas por vírgula.</div>
+    <label class="campo"><span>Lista</span><textarea name="lista" rows="10" required></textarea></label>
+    <div id="prev-ag" class="mudo" style="font-size:13px"></div>`,
+    async f => {
+      const {ok, erros} = lerLista(f.lista.value);
+      if(erros.length) throw new Error(erros.slice(0,5).join(' · '));
+      if(!ok.length) throw new Error('Nenhuma linha válida.');
+      await api('POST', 'matric_agentes', ok, 'return=minimal');
+      await recarregar(ok.length+' agente(s) cadastrado(s).');
+    }, {rotulo:'Cadastrar', largura:720});
+  const lerLista = txt => {
+    const ok = [], erros = [], sig = new Map(D.ubs.map(u=>[u.sigla.toUpperCase(), u.id]));
+    const fun = new Map(FUNCOES.map(x=>[x.toUpperCase(), x]));
+    txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach((l,i) => {
+      const c = l.split(/\t|;/).map(x=>x.trim());
+      if(/^nome$/i.test(c[0])) return;
+      const funcao = fun.get((c[1]||'ACS').toUpperCase()) || null;
+      const siglas = (c[2]||'').split(/[,\/]/).map(x=>x.trim().toUpperCase()).filter(Boolean);
+      const ids = siglas.map(x=>sig.get(x)), falta = siglas.filter((x,k)=>!ids[k]);
+      if(!c[0]) erros.push(`linha ${i+1}: falta o nome`);
+      else if(!funcao) erros.push(`linha ${i+1}: função "${c[1]}" não reconhecida`);
+      else if(falta.length) erros.push(`linha ${i+1}: UBS "${falta.join(', ')}" não cadastrada`);
+      else if(funcao==='ACS' && ids.length!==1) erros.push(`linha ${i+1}: ACS precisa de uma UBS`);
+      else ok.push({nome:c[0], funcao, ubs_id:funcao==='ACS'?ids[0]:null, ubs_ids:funcao==='ACS'?[]:ids, equipe:c[3]||null, microarea:c[4]||null});
+    });
+    return {ok, erros};
+  };
+  form.lista.oninput = () => { const {ok, erros} = lerLista(form.lista.value);
+    form.querySelector('#prev-ag').innerHTML = `${ok.length} linha(s) prontas${erros.length?` · <span class="venc">${erros.length} com problema: ${esc(erros.slice(0,3).join(' · '))}</span>`:''}`; };
+}
+function formAcesso(a){
+  modal(a?'Editar acesso':'Incluir pessoa', `
+    <label class="campo"><span>E-mail *</span><input type="email" name="email" required value="${esc(a?a.email:'')}" ${a?'disabled':''}></label>
+    <div class="grade2">
+      <label class="campo"><span>Nome</span><input type="text" name="nome" value="${esc(a?a.nome:'')}"></label>
+      <label class="campo"><span>Função</span><select name="funcao">${opts(FUNCOES, a?a.funcao:'', 'Selecione')}</select></label>
+    </div>
+    <label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="edita" ${a&&a.edita?'checked':''} style="width:auto"> Edição: registra e edita reuniões e vê todas as UBS</label>
+    <div class="campo" id="campo-ubs"><span>UBS que pode ver (consulta) *</span>
+      <div class="chips">${D.ubs.map(u => `<label class="chip"><input type="checkbox" name="ubs" value="${u.id}" ${a&&(a.ubs_ids||[]).includes(u.id)?'checked':''}><span>${esc(u.nome)}<small>${esc(u.sigla)}</small></span></label>`).join('')}</div></div>
+    ${a?'<button type="button" class="lnk" id="b-delac" style="justify-self:start;color:var(--vencido)">Remover acesso</button>':''}`,
+    async f => {
+      const sel = [...f.querySelectorAll('input[name=ubs]:checked')].map(x=>Number(x.value));
+      if(!f.edita.checked && !sel.length) throw new Error('Marque ao menos uma UBS para o acesso de consulta.');
+      const linha = {nome:val(f,'nome'), funcao:val(f,'funcao'), edita:f.edita.checked, ubs_ids:f.edita.checked?[]:sel};
+      if(a) await alterar('matric_acesso', a.email, linha, 'email');
+      else {
+        const email = String(f.email.value).trim().toLowerCase();
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('E-mail inválido.');
+        await inserir('matric_acesso', {...linha, email});
+      }
+      await recarregar('Acesso salvo.');
+    });
+  const fm = document.querySelector('.fundo form'), cu = fm.querySelector('#campo-ubs');
+  const mostrar = () => cu.style.display = fm.edita.checked ? 'none' : '';
+  fm.edita.onchange = mostrar; mostrar();
+  const bd = $('#b-delac');
+  if(bd) bd.onclick = async () => {
+    try{ await excluir('matric_acesso', a.email, 'email'); document.querySelector('.fundo').remove(); await recarregar('Acesso removido.'); }
+    catch(e){ aviso(e.message, true); }
+  };
+}
+function colarAcessos(){
+  const form = modal('Colar lista de acessos', `
+    <div class="info">Uma pessoa por linha, separando com ponto e vírgula (ou colando colunas do Excel):<br>
+      <span class="mono">E-mail; Nome; Função; Siglas das UBS; Edita (S/N)</span><br>
+      Ex.: <span class="mono">ubscentro@gmail.com; UBS Centro; Enfermeiro(a) da UBS; CENTRO</span><br>
+      <span class="mono">fulano@gmail.com; Fulano; ACV; ; S</span> (edição vê todas as UBS)</div>
+    <label class="campo"><span>Lista</span><textarea name="lista" rows="10" required></textarea></label>
+    <div id="prev-ac" class="mudo" style="font-size:13px"></div>`,
+    async f => {
+      const {ok, erros} = ler(f.lista.value);
+      if(erros.length) throw new Error(erros.slice(0,5).join(' · '));
+      if(!ok.length) throw new Error('Nenhuma linha válida.');
+      await api('POST', 'matric_acesso?on_conflict=email', ok, 'resolution=merge-duplicates,return=minimal');
+      await recarregar(ok.length+' acesso(s) salvo(s).');
+    }, {rotulo:'Salvar acessos', largura:760});
+  const ler = txt => {
+    const ok = [], erros = [], sig = new Map(D.ubs.map(u=>[u.sigla.toUpperCase(), u.id])), fun = new Map(FUNCOES.map(x=>[x.toUpperCase(), x]));
+    txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach((l,i) => {
+      const c = l.split(/\t|;/).map(x=>x.trim());
+      if(/^e-?mail$/i.test(c[0])) return;
+      const email = (c[0]||'').toLowerCase(), edita = /^(s|sim|x|1)$/i.test(c[4]||'');
+      const siglas = (c[3]||'').split(/[,\/]/).map(x=>x.trim().toUpperCase()).filter(Boolean), ids = siglas.map(x=>sig.get(x)), falta = siglas.filter((x,k)=>!ids[k]);
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) erros.push(`linha ${i+1}: e-mail inválido`);
+      else if(falta.length) erros.push(`linha ${i+1}: UBS "${falta.join(', ')}" não cadastrada`);
+      else if(!edita && !ids.length) erros.push(`linha ${i+1}: consulta precisa de ao menos uma UBS`);
+      else ok.push({email, nome:c[1]||null, funcao:fun.get((c[2]||'').toUpperCase())||c[2]||null, edita, ubs_ids:edita?[]:ids});
+    });
+    return {ok, erros};
+  };
+  form.lista.oninput = () => { const {ok, erros} = ler(form.lista.value);
+    form.querySelector('#prev-ac').innerHTML = `${ok.length} linha(s) prontas${erros.length?` · <span class="venc">${erros.length} com problema: ${esc(erros.slice(0,3).join(' · '))}</span>`:''}`; };
+}
+
+/* ================= Partida ================= */
+iniciar();
+</script>
+</body>
+</html>
