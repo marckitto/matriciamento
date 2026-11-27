@@ -197,6 +197,9 @@ textarea{resize:vertical;min-height:64px}
 .lista-ev li:last-child{border-bottom:0}
 .lista-ev .dt{font-family:var(--mono);font-size:12px;color:var(--mudo)}
 @media (max-width:640px){ .cal .dia{min-height:58px} .cal .ev{font-size:0;height:5px;padding:0;border:0;background:currentColor!important;border-radius:3px} .lista-ev li{grid-template-columns:80px 1fr} .lista-ev li > :last-child{grid-column:1/3} }
+.enc-dec{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;border:1px solid var(--linha2);border-radius:10px;padding:10px 12px}
+.enc-dec select{width:auto}
+.tag-enc{display:inline-block;margin-top:3px;font-size:11px;font-weight:600;color:var(--aguardando);background:var(--aguardando-bg);border-radius:6px;padding:1px 7px}
 .pres-grupo{border:1px solid var(--linha2);border-radius:8px;padding:8px 10px}
 .pres-grupo .pg-tit{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;font-weight:600}
 .pres-grupo .pg-tit span{display:flex;gap:6px}
@@ -447,12 +450,12 @@ async function excluir(t, id, col='id'){
 const gravarOuAtualizar = (t, linha, conflito) => api('POST', `${t}?on_conflict=${conflito}`, linha, 'resolution=merge-duplicates,return=representation');
 
 /* ================= Dados ================= */
-const D = {ubs:[], reunioes:[], pontos:[], atual:[], enc:[], acesso:[], agentes:[], pact:[], agenda:[]};
-const IX = {agente:new Map(), ubs:new Map(), reun:new Map(), ponto:new Map(), atualPonto:new Map(), atualChave:new Map(), encPonto:new Map()};
+const D = {ubs:[], reunioes:[], pontos:[], atual:[], enc:[], acesso:[], agentes:[], pact:[], agenda:[], encHist:[]};
+const IX = {histEnc:new Map(), agente:new Map(), ubs:new Map(), reun:new Map(), ponto:new Map(), atualPonto:new Map(), atualChave:new Map(), encPonto:new Map()};
 const F = {ubs:'', pSit:'abertos', pTipo:'', pBusca:'', eConc:false, eBusca:'', aUbs:'', aFun:'', aIn:false, gMes:'', gDia:'', gUbs:'', gTipos:{reuniao:true, acao:true, prazo:true, revisao:true}, kUbs:'', kSit:'ativas', kBusca:''};
 
 async function carregar(){
-  const [u,r,p,a,e,g,k,ag] = await Promise.all([
+  const [u,r,p,a,e,g,k,ag,eh] = await Promise.all([
     todos('matric_ubs','select=*&order=sigla'),
     todos('matric_reunioes','select=*&order=data.desc'),
     todos('matric_pontos','select=*&order=codigo'),
@@ -460,9 +463,10 @@ async function carregar(){
     todos('matric_encaminhamentos','select=*&order=prazo.asc.nullslast'),
     todos('matric_agentes','select=*&order=nome'),
     todos('matric_pactuacoes','select=*&order=data.desc'),
-    todos('matric_agenda','select=*&order=data')
+    todos('matric_agenda','select=*&order=data'),
+    todos('matric_enc_historico','select=*&order=criado_em')
   ]);
-  Object.assign(D, {ubs:u, reunioes:r, pontos:p, atual:a, enc:e, agentes:g, pact:k, agenda:ag});
+  Object.assign(D, {ubs:u, reunioes:r, pontos:p, atual:a, enc:e, agentes:g, pact:k, agenda:ag, encHist:eh});
   if(perfil && perfil.edita) D.acesso = await todos('matric_acesso','select=*&order=nome');
   indexar();
 }
@@ -473,7 +477,8 @@ function indexar(){
   IX.agente = new Map(D.agentes.map(x=>[x.id,x]));
   IX.reun = new Map(D.reunioes.map(x=>[x.id,x]));
   IX.ponto = new Map(D.pontos.map(x=>[x.id,x]));
-  IX.atualPonto = new Map(); IX.atualChave = new Map(); IX.encPonto = new Map();
+  IX.atualPonto = new Map(); IX.atualChave = new Map(); IX.encPonto = new Map(); IX.histEnc = new Map();
+  for(const h of D.encHist){ if(!IX.histEnc.has(h.enc_id)) IX.histEnc.set(h.enc_id, []); IX.histEnc.get(h.enc_id).push(h); }
   for(const a of D.atual){
     if(!IX.atualPonto.has(a.ponto_id)) IX.atualPonto.set(a.ponto_id, []);
     IX.atualPonto.get(a.ponto_id).push(a);
@@ -515,6 +520,30 @@ function encAnteriores(p, data){
     .sort((a,b)=>(dataReun(a.reuniao_id)||'').localeCompare(dataReun(b.reuniao_id)||''));
 }
 const vencido = e => !e.concluido && e.prazo && e.prazo < hoje();
+function tagEnc(e){
+  const hist = IX.histEnc.get(e.id) || [], alt = hist.some(h => h.tipo==='Alteração' && (h.acao_nova || h.responsavel_novo));
+  const partes = [];
+  if(e.prorrogacoes) partes.push(`prorrogado ${e.prorrogacoes}×${e.prazo_original?' · prazo original '+fmt(e.prazo_original):''}`);
+  if(alt) partes.push('alterado');
+  return partes.length ? `<span class="tag-enc" title="Veja o histórico no ponto">${esc(partes.join(' · '))}</span>` : '';
+}
+function somarDias(iso, n){ const d = new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function formProrrogar(e, R){
+  const base = e.prazo && e.prazo > hoje() ? e.prazo : hoje(), p = IX.ponto.get(e.ponto_id);
+  const form = modal('Prorrogar encaminhamento', `
+    <div class="info"><b>${esc(e.acao)}</b><br><span class="mudo">${esc(p?p.codigo:'')} · ${esc(e.responsavel||'sem responsável')} · prazo atual <span class="mono">${fmt(e.prazo)}</span>${vencido(e)?' · <span class="venc">vencido</span>':''}</span>
+      ${e.prorrogacoes?`<br><span class="mudo">Já prorrogado ${e.prorrogacoes}× (prazo original ${fmt(e.prazo_original)})</span>`:''}</div>
+    <div class="campo"><span>Novo prazo *</span>
+      <div class="acoes"><input type="date" name="prazo" required value="${somarDias(base, 15)}" style="max-width:180px">
+        <button type="button" class="btn mini" data-mais="7">+7 dias</button><button type="button" class="btn mini" data-mais="15">+15 dias</button><button type="button" class="btn mini" data-mais="30">+30 dias</button></div></div>
+    <label class="campo"><span>Motivo da prorrogação *</span><textarea name="motivo" rows="2" required placeholder="Ex.: morador não encontrado; aguardando Limpeza Urbana"></textarea></label>`,
+    async f => {
+      if(e.prazo && f.prazo.value <= e.prazo) throw new Error('O novo prazo precisa ser depois do prazo atual (' + fmt(e.prazo) + ').');
+      await alterar('matric_encaminhamentos', e.id, {prazo:f.prazo.value, motivo:val(f,'motivo'), motivo_reuniao: R ? R.id : null});
+      await recarregar('Prazo prorrogado para ' + fmt(f.prazo.value) + '.');
+    }, {rotulo:'Prorrogar'});
+  form.querySelectorAll('[data-mais]').forEach(b => b.onclick = () => form.prazo.value = somarDias(base, Number(b.dataset.mais)));
+}
 const abertos = () => D.pontos.filter(p => !FECHADAS.has(p.situacao));
 
 /* ================= Login ================= */
@@ -848,11 +877,11 @@ function outrosHTML(lista){
   const linha = p => `<div class="part-linha">
     <input type="text" placeholder="Nome" data-p="nome" value="${esc(p.nome)}">
     <select data-p="funcao">${opts(FUNCOES, p.funcao, 'Função')}</select>
-    <input type="text" placeholder="Microárea/área" data-p="area" value="${esc(p.area)}">
+    <input type="text" placeholder="Microárea/área" data-p="area" list="dl-micro-parts" value="${esc(p.area)}">
     <label class="cad" title="Incluir no cadastro para aparecer nas próximas reuniões"><input type="checkbox" data-p="salvar"> cadastrar</label>
     <button type="button" data-rem title="Remover">×</button></div>`;
   return `<div class="campo"><span>Outros participantes <small>(quem não está no cadastro · marque "cadastrar" para a pessoa aparecer nas próximas reuniões)</small></span>
-    <div id="parts" style="display:grid;gap:6px">${lista.map(linha).join('')}</div>
+    <datalist id="dl-micro-parts"></datalist><div id="parts" style="display:grid;gap:6px">${lista.map(linha).join('')}</div>
     <button type="button" class="btn mini" id="b-addpart" style="align-self:flex-start;margin-top:4px">+ Outro participante</button></div>`;
 }
 const areaAgente = g => [g.equipe, g.microarea].filter(Boolean).join(' · ');
@@ -882,6 +911,8 @@ function ligarPresenca(form, r){
     // marcados de outra UBS continuam visíveis para não sumirem ao trocar a UBS
     const fora = ativos.filter(g => marcados.has(g.id) && g.funcao!=='ACV' && !acs.includes(g) && !outros.includes(g));
     const ubsNomeSel = ubs ? ubsNome(ubs) : '';
+    const dl = form.querySelector('#dl-micro-parts');
+    if(dl) dl.innerHTML = [...new Set(acs.map(g => g.microarea).filter(Boolean))].map(m => `<option value="${esc(m)}">`).join('');
     box.innerHTML = (!ubs ? '<div class="info">Escolha a UBS para ver os ACS dela.</div>' : (acs.length ? '' : '<div class="info">Nenhum ACS cadastrado para esta UBS.</div>'))
       + grupo('ACS — '+ubsNomeSel, acs) + grupo('ACV — '+(ubsNomeSel||'escolha a UBS'), acv, true) + grupo('UBS e supervisão', outros, true) + grupo('Marcados de outras UBS', fora, true)
       + (acvOutras.length ? `<details class="pres-grupo"><summary style="cursor:pointer;font-size:12px;font-weight:600">ACV de outras UBS (${acvOutras.length})</summary><div style="margin-top:8px">${grupo('', acvOutras, true).replace('class="pres-grupo"','style="border:0;padding:0"')}</div></details>` : '')
@@ -998,7 +1029,7 @@ function telaReuniao(id){
       <td class="cod"><a href="#/ponto/${p.id}">${esc(p.codigo)}</a></td>
       <td>${esc(p.endereco||'—')}<div class="sub mono">${[p.quarteirao?'Q. '+esc(p.quarteirao):'', esc(p.microarea||'')].filter(Boolean).join(' · ')}</div></td>
       <td>${esc(p.descricao)}${p.tipo?`<div class="sub">${esc(p.tipo)}</div>`:''}</td>
-      <td>${encs.length?encs.map(e=>`<div>${esc(e.acao)}<div class="sub">${esc(e.responsavel||'')}${e.prazo?' · '+fmt(e.prazo):''}${e.concluido?' · <span class="ok">concluído</span>':vencido(e)?' · <span class="venc">vencido</span>':''}</div></div>`).join(''):'<span class="mudo">—</span>'}${ocultos?`<div class="sub"><a href="#/ponto/${p.id}">+ ${ocultos} anterior(es) concluído(s)</a></div>`:''}</td>
+      <td>${encs.length?encs.map(e=>`<div>${esc(e.acao)}<div class="sub">${esc(e.responsavel||'')}${e.prazo?' · '+fmt(e.prazo):''}${e.concluido?' · <span class="ok">concluído</span>':vencido(e)?' · <span class="venc">vencido</span>':''}</div>${tagEnc(e)}</div>`).join(''):'<span class="mudo">—</span>'}${ocultos?`<div class="sub"><a href="#/ponto/${p.id}">+ ${ocultos} anterior(es) concluído(s)</a></div>`:''}</td>
       <td>${a&&a.feito?esc(a.feito):'<span class="mudo">—</span>'}</td>
       <td>${a?sit(a.situacao):`<span class="sit sit-pendente" title="Situação anterior: ${esc(situacaoAntes(p,R.data))}">a atualizar</span><div class="sub">antes: ${esc(situacaoAntes(p,R.data))}</div>`}</td>
       ${ed?`<td class="acao"><button class="btn mini" data-atual="${p.id}">${a?'Editar':'Atualizar'}</button></td>`:''}</tr>`;
@@ -1012,11 +1043,11 @@ function telaReuniao(id){
       ${ed?`<td class="acao"><button class="btn mini" data-epto="${p.id}">Editar</button></td>`:''}</tr>`).join('');
   const linhasC = C.map(e => { const p = IX.ponto.get(e.ponto_id); return `<tr>
       <td class="cod">${p?`<a href="#/ponto/${p.id}">${esc(p.codigo)}</a>`:'—'}</td>
-      <td>${esc(e.acao)}</td>
+      <td>${esc(e.acao)}${tagEnc(e)}</td>
       <td>${esc(e.responsavel||'—')}</td>
       <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}</td>
       <td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td>
-      ${ed?`<td class="acao"><button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button> <button class="btn mini" data-eenc="${e.id}">Editar</button></td>`:''}</tr>`; }).join('');
+      ${ed?`<td class="acao">${e.concluido?'':`<button class="btn mini" data-pror="${e.id}">Prorrogar</button> `}<button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button> <button class="btn mini" data-eenc="${e.id}">Alterar</button></td>`:''}</tr>`; }).join('');
   const resolvidos = A.filter(p => { const a = atualDe(p.id,R.id); return a && FECHADAS.has(a.situacao); }).length;
   const emAberto = A.concat(B).filter(p => !FECHADAS.has(situacaoNa(p, R))).length;
   const thAcao = ed ? '<th class="acao"></th>' : '';
@@ -1115,6 +1146,7 @@ function telaReuniao(id){
   document.querySelectorAll('[data-atual]').forEach(b => b.onclick = () => formAtualizacao(R, IX.ponto.get(b.dataset.atual)));
   document.querySelectorAll('[data-epto]').forEach(b => b.onclick = () => formPonto(R, IX.ponto.get(b.dataset.epto)));
   document.querySelectorAll('[data-eenc]').forEach(b => b.onclick = () => formEnc(R, D.enc.find(e=>e.id===b.dataset.eenc)));
+  document.querySelectorAll('[data-pror]').forEach(b => b.onclick = () => formProrrogar(D.enc.find(e=>e.id===b.dataset.pror), R));
   document.querySelectorAll('[data-conc]').forEach(b => b.onclick = async () => {
     const e = D.enc.find(x=>x.id===b.dataset.conc); b.disabled = true;
     try{ await alterar('matric_encaminhamentos', e.id, {concluido:!e.concluido}); await recarregar(e.concluido?'Encaminhamento reaberto.':'Encaminhamento concluído.'); }
@@ -1126,31 +1158,59 @@ function formAtualizacao(R, p){
   modal(`Atualizar ${p.codigo}`, `
     <div class="info"><b>${esc(p.descricao)}</b><br>${esc(p.endereco||'')}${p.quarteirao?' · Q. '+esc(p.quarteirao):''}
       <br><span class="mudo">Situação antes desta reunião: ${esc(situacaoAntes(p,R.data))}</span>
-      ${encs.length?'<br><span class="mudo">Encaminhamento anterior: '+encs.map(e=>esc(e.acao)+(e.responsavel?' ('+esc(e.responsavel)+')':'')).join('; ')+'</span>':''}</div>
+</div>
     <label class="campo"><span>O que foi feito *</span><textarea name="feito" rows="3" required>${esc(a?a.feito:'')}</textarea></label>
     <label class="campo"><span>Situação atual *</span><select name="situacao" required>${opts(SITUACOES, a?a.situacao:situacaoAntes(p,R.data))}</select>
       <small>Resolvido e Encerrado sem solução tiram o ponto das próximas atas.</small></label>
-    ${encs.some(e=>!e.concluido)?`<label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="concluir" style="width:auto"> Marcar os encaminhamentos anteriores como concluídos</label>`:''}
+    ${encs.some(e=>!e.concluido)?`<div class="campo"><span>Encaminhamentos pendentes deste ponto</span>
+      ${encs.filter(e=>!e.concluido).map(e=>`<div class="enc-dec" data-enc="${e.id}">
+        <div><b>${esc(e.acao)}</b><div class="sub">${esc(e.responsavel||'sem responsável')} · prazo <span class="mono">${fmt(e.prazo)}</span>${vencido(e)?' · <span class="venc">vencido</span>':''}</div>${tagEnc(e)}</div>
+        <div class="acoes"><select data-dec><option value="manter">Manter como está</option><option value="concluir">Concluído</option><option value="prorrogar">Prorrogar</option></select>
+          <input type="date" data-novo value="${somarDias([e.prazo||'', R.data, hoje()].sort().pop(), 15)}" class="oculto" style="max-width:170px"></div></div>`).join('')}
+      <label class="campo oculto" id="c-motivo-pror"><span>Motivo da prorrogação *</span><textarea name="motivo_pror" rows="2" placeholder="Ex.: morador não encontrado; aguardando outro setor"></textarea></label></div>`:''}
     ${a?'<button type="button" class="lnk" id="b-delatual" style="justify-self:start;color:var(--vencido)">Remover esta atualização</button>':''}`,
     async f => {
       await gravarOuAtualizar('matric_atualizacoes', {ponto_id:p.id, reuniao_id:R.id, feito:val(f,'feito'), situacao:f.situacao.value}, 'ponto_id,reuniao_id');
-      if(f.concluir && f.concluir.checked){
-        for(const e of encs.filter(e=>!e.concluido)) await alterar('matric_encaminhamentos', e.id, {concluido:true});
+      for(const d of [...f.querySelectorAll('.enc-dec')].map(d => ({id:d.dataset.enc, dec:d.querySelector('[data-dec]').value, novo:d.querySelector('[data-novo]').value}))){
+        if(d.dec==='concluir') await alterar('matric_encaminhamentos', d.id, {concluido:true, motivo_reuniao:R.id});
+        if(d.dec==='prorrogar') await alterar('matric_encaminhamentos', d.id, {prazo:d.novo, motivo:val(f,'motivo_pror'), motivo_reuniao:R.id});
+      }
+      const decisoes = [...f.querySelectorAll('.enc-dec')].map(d => ({id:d.dataset.enc, dec:d.querySelector('[data-dec]').value, novo:d.querySelector('[data-novo]').value}));
+      if(decisoes.some(d => d.dec==='prorrogar') && !val(f,'motivo_pror')) throw new Error('Informe o motivo da prorrogação.');
+      for(const d of decisoes){
+        const e = D.enc.find(x => x.id===d.id);
+        if(d.dec==='prorrogar' && e.prazo && d.novo <= e.prazo) throw new Error(`O novo prazo de "${e.acao}" precisa ser depois de ${fmt(e.prazo)}.`);
       }
       await recarregar('Ponto atualizado.');
     });
+  const fa = document.querySelector('.fundo form');
+  const ajustarDec = () => {
+    let algum = false;
+    fa.querySelectorAll('.enc-dec').forEach(d => { const pr = d.querySelector('[data-dec]').value==='prorrogar'; d.querySelector('[data-novo]').classList.toggle('oculto', !pr); algum = algum || pr; });
+    const cm = fa.querySelector('#c-motivo-pror'); if(cm) cm.classList.toggle('oculto', !algum);
+  };
+  fa.querySelectorAll('[data-dec]').forEach(s => s.onchange = ajustarDec);
+  if(fa.situacao) fa.situacao.addEventListener('change', () => { if(FECHADAS.has(fa.situacao.value)) fa.querySelectorAll('[data-dec]').forEach(s => { if(s.value==='manter') s.value = 'concluir'; }); ajustarDec(); });
   const bd = $('#b-delatual');
   if(bd) bd.onclick = async () => {
     try{ await excluir('matric_atualizacoes', a.id); document.querySelector('.fundo').remove(); await recarregar('Atualização removida.'); }
     catch(e){ aviso(e.message, true); }
   };
 }
+function opcoesMicro(ubsId, atual){
+  const acs = D.agentes.filter(g => g.funcao==='ACS' && g.ubs_id===ubsId && g.microarea && (g.ativo || g.microarea===atual)).sort(ordemAgente);
+  const vistos = new Set(); const lista = [];
+  for(const g of acs){ if(vistos.has(g.microarea)) continue; vistos.add(g.microarea); lista.push({v:g.microarea, t:`${g.microarea} — ${g.nome}`}); }
+  if(atual && !vistos.has(atual)) lista.push({v:atual, t:atual});
+  lista.push({v:'Sem microárea', t:'Sem microárea (área descoberta)'});
+  return opts(lista, atual || '', 'Selecione');
+}
 function formPonto(R, p){
   const titulo = p ? `Editar ${p.codigo}` : 'Novo ponto';
   modal(titulo, `
     ${p?'':`<div class="info">O código será gerado ao salvar: <b class="mono">${esc(ubsSigla(R.ubs_id))}-${R.data.slice(0,4)}-…</b></div>`}
     <div class="grade3">
-      <label class="campo"><span>Microárea</span><input type="text" name="microarea" value="${esc(p?p.microarea:'')}"></label>
+      <label class="campo"><span>Microárea</span><select name="microarea">${opcoesMicro(R.ubs_id, p?p.microarea:'')}</select></label>
       <label class="campo"><span>Quarteirão</span><input type="text" name="quarteirao" value="${esc(p?p.quarteirao:'')}"></label>
       <label class="campo"><span>Tipo de situação</span><select name="tipo">${opts(TIPOS, p?p.tipo:'', 'Selecione')}</select></label>
     </div>
@@ -1164,6 +1224,11 @@ function formPonto(R, p){
       if(p){ await alterar('matric_pontos', p.id, linha); await recarregar('Ponto atualizado.'); }
       else { const [n] = await inserir('matric_pontos', {...linha, ubs_id:R.ubs_id, reuniao_origem:R.id}); await recarregar('Ponto '+n.codigo+' criado.'); }
     }, {largura:680});
+  const fp = document.querySelector('.fundo form');
+  fp.microarea.addEventListener('change', () => {
+    const g = D.agentes.find(x => x.funcao==='ACS' && x.ubs_id===R.ubs_id && x.microarea===fp.microarea.value);
+    if(g && !fp.levantado_por.value.trim()) fp.levantado_por.value = `${g.nome} (ACS)`;
+  });
   const bd = $('#b-delpto');
   if(bd) bd.onclick = () => { document.querySelector('.fundo').remove();
     confirmar('Excluir ponto', `Excluir <b class="mono">${esc(p.codigo)}</b>? O histórico e os encaminhamentos dele também serão apagados. O código não será reaproveitado.`,
@@ -1172,17 +1237,24 @@ function formPonto(R, p){
 function formEnc(R, e){
   const candidatos = parteA(R).concat(parteB(R));
   if(!candidatos.length) return aviso('Registre ou retome um ponto antes de criar encaminhamentos.', true);
-  modal(e?'Editar encaminhamento':'Novo encaminhamento', `
+  const form = modal(e?'Alterar encaminhamento':'Novo encaminhamento', `
     <label class="campo"><span>Ponto *</span><select name="ponto_id" required>${opts(candidatos.map(p=>({v:p.id,t:`${p.codigo} — ${p.descricao.slice(0,70)}`})), e?e.ponto_id:'', 'Selecione')}</select></label>
     <label class="campo"><span>Encaminhamento (ação) *</span><textarea name="acao" rows="3" required>${esc(e?e.acao:'')}</textarea></label>
     <div class="grade2">
       <label class="campo"><span>Responsável</span><input type="text" name="responsavel" value="${esc(e?e.responsavel:'')}" placeholder="Nome e função"></label>
       <label class="campo"><span>Prazo</span><input type="date" name="prazo" value="${esc(e?e.prazo||'':'')}"></label>
     </div>
-    ${e?'<button type="button" class="lnk" id="b-delenc" style="justify-self:start;color:var(--vencido)">Excluir este encaminhamento</button>':''}`,
+    ${e?`<label class="campo"><span>Motivo da alteração <span id="motivo-obr"></span></span><textarea name="motivo" rows="2" placeholder="Obrigatório se mudar a ação, o responsável ou o prazo. Ex.: estratégia mudou após conversa com o morador"></textarea>
+      <small>O texto anterior fica guardado no histórico do ponto.</small></label>
+      <button type="button" class="lnk" id="b-delenc" style="justify-self:start;color:var(--vencido)">Excluir este encaminhamento</button>`:''}`,
     async f => {
       const linha = {ponto_id:f.ponto_id.value, acao:val(f,'acao'), responsavel:val(f,'responsavel'), prazo:val(f,'prazo')};
-      if(e) await alterar('matric_encaminhamentos', e.id, linha);
+      if(e){
+        const mudou = linha.acao!==e.acao || (linha.responsavel||null)!==(e.responsavel||null) || (linha.prazo||null)!==(e.prazo||null);
+        if(mudou && !val(f,'motivo')) throw new Error('Informe o motivo da alteração.');
+        if(mudou){ linha.motivo = val(f,'motivo'); linha.motivo_reuniao = R ? R.id : null; }
+        await alterar('matric_encaminhamentos', e.id, linha);
+      }
       else await inserir('matric_encaminhamentos', {...linha, reuniao_id:R.id});
       await recarregar(e?'Encaminhamento atualizado.':'Encaminhamento registrado.');
     });
@@ -1253,11 +1325,23 @@ function telaPonto(id){
   const p = IX.ponto.get(id);
   if(!p){ $('#app').innerHTML = '<div class="bloco"><div class="vazio">Ponto não encontrado. <a href="#/pontos">Voltar</a></div></div>'; return; }
   const orig = IX.reun.get(p.reuniao_origem);
+  const mudancas = (IX.encPonto.get(p.id)||[]).flatMap(e => (IX.histEnc.get(e.id)||[]).filter(h => h.tipo==='Prorrogação' || h.tipo==='Alteração').map(h => ({e, h})));
   const eventos = [{d:orig?orig.data:'', r:orig, tipo:'origem'}]
     .concat((IX.atualPonto.get(p.id)||[]).map(a=>({d:dataReun(a.reuniao_id), r:IX.reun.get(a.reuniao_id), tipo:'atual', a})))
+    .concat(mudancas.map(({e,h}) => ({d:(h.reuniao_id && dataReun(h.reuniao_id)) || h.criado_em.slice(0,10), r:h.reuniao_id?IX.reun.get(h.reuniao_id):null, tipo:'enc', e, h})))
     .sort((x,y)=>(x.d||'').localeCompare(y.d||'') || (x.tipo==='origem'?-1:1));
   const encs = (IX.encPonto.get(p.id)||[]).slice().sort((a,b)=>(dataReun(a.reuniao_id)||'').localeCompare(dataReun(b.reuniao_id)||''));
   const linkR = r => r ? `<a href="#/reuniao/${r.id}">reunião${r.numero?' nº '+r.numero:''}</a>` : 'reunião';
+  const descMudanca = ({e, h, r}) => {
+    const onde = r ? ` na ${linkR(r)}` : '';
+    const quem = h.criado_por ? ` · por ${esc(h.criado_por)}` : '';
+    if(h.tipo==='Prorrogação') return `<b>Prazo prorrogado</b>${onde}: <span class="mono">${fmt(h.prazo_anterior)} → ${fmt(h.prazo_novo)}</span><p>${esc(e.acao)}${h.motivo?` — motivo: ${esc(h.motivo)}`:''}<span class="sub">${quem}</span></p>`;
+    const itens = [];
+    if(h.acao_nova) itens.push(`ação: “${esc(h.acao_anterior)}” → “${esc(h.acao_nova)}”`);
+    if(h.responsavel_novo || h.responsavel_anterior) itens.push(`responsável: ${esc(h.responsavel_anterior||'—')} → ${esc(h.responsavel_novo||'—')}`);
+    if(h.prazo_anterior !== h.prazo_novo) itens.push(`prazo: ${fmt(h.prazo_anterior)} → ${fmt(h.prazo_novo)}`);
+    return `<b>Encaminhamento alterado</b>${onde}<p>${itens.join('<br>')}${h.motivo?`<br>Motivo: ${esc(h.motivo)}`:''}<span class="sub">${quem}</span></p>`;
+  };
   $('#app').innerHTML = `
     <div class="cab"><div><a href="#/pontos" class="lnk">← Pontos</a>
       <h1 class="mono">${esc(p.codigo)}</h1><p>${sit(p.situacao)} <span class="mudo">· ${esc(ubsNome(p.ubs_id))}</span></p></div>
@@ -1272,11 +1356,11 @@ function telaPonto(id){
     </div><p style="margin:14px 0 0">${esc(p.descricao)}</p></div></section>
     <section class="bloco"><div class="tit"><h2>Histórico nas reuniões</h2></div><div class="corpo">
       <ul class="linha-tempo">${eventos.map(ev => `<li><div class="dt">${fmt(ev.d)}</div><div class="ev">
-        ${ev.tipo==='origem' ? `<b>Levantado</b> na ${linkR(ev.r)}` : `${sit(ev.a.situacao)} na ${linkR(ev.r)}<p>${esc(ev.a.feito||'')}</p>`}
+        ${ev.tipo==='origem' ? `<b>Levantado</b> na ${linkR(ev.r)}` : ev.tipo==='enc' ? descMudanca(ev) : `${sit(ev.a.situacao)} na ${linkR(ev.r)}<p>${esc(ev.a.feito||'')}</p>`}
       </div></li>`).join('')}</ul></div></section>
     <section class="bloco"><div class="tit"><h2>Encaminhamentos</h2></div><div class="corpo sem">
       ${encs.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Reunião</th><th>Encaminhamento</th><th>Responsável</th><th>Prazo</th><th>Concluído</th></tr></thead>
-      <tbody>${encs.map(e=>`<tr><td class="mono">${fmt(dataReun(e.reuniao_id))}</td><td>${esc(e.acao)}</td><td>${esc(e.responsavel||'—')}</td>
+      <tbody>${encs.map(e=>`<tr><td class="mono">${fmt(dataReun(e.reuniao_id))}</td><td>${esc(e.acao)}${tagEnc(e)}</td><td>${esc(e.responsavel||'—')}</td>
         <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}</td><td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td></tr>`).join('')}</tbody></table></div>`
       :'<div class="vazio">Nenhum encaminhamento.</div>'}</div></section>`;
   const be = $('#b-ep'); if(be) be.onclick = () => formPonto(orig, p);
@@ -1301,11 +1385,13 @@ function telaEncaminhamentos(){
       <tbody>${lista.map(e => { const p = IX.ponto.get(e.ponto_id); return `<tr>
         <td class="mono ${vencido(e)?'venc':''}">${fmt(e.prazo)}${vencido(e)?`<div class="sub venc">${dias(e.prazo,h)} dia(s) de atraso</div>`:''}</td>
         <td class="cod"><a href="#/ponto/${p.id}">${esc(p.codigo)}</a></td><td>${esc(ubsSigla(p.ubs_id))}</td>
-        <td>${esc(e.acao)}<div class="sub">${esc(p.descricao.slice(0,90))}</div></td><td>${esc(e.responsavel||'—')}</td>
+        <td>${esc(e.acao)}${tagEnc(e)}<div class="sub">${esc(p.descricao.slice(0,90))}</div></td><td>${esc(e.responsavel||'—')}</td>
         <td class="mono"><a href="#/reuniao/${e.reuniao_id}">${fmt(dataReun(e.reuniao_id))}</a></td>
         <td>${e.concluido?'<span class="ok">Sim</span>':vencido(e)?'<span class="venc">Vencido</span>':'Não'}</td>
-        ${perfil.edita?`<td class="acao"><button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button></td>`:''}</tr>`; }).join('')}</tbody></table></div>`
+        ${perfil.edita?`<td class="acao">${e.concluido?'':`<button class="btn mini" data-pror="${e.id}">Prorrogar</button> `}<button class="btn mini" data-conc="${e.id}">${e.concluido?'Reabrir':'Concluir'}</button> <button class="btn mini" data-eenc="${e.id}">Alterar</button></td>`:''}</tr>`; }).join('')}</tbody></table></div>`
       : '<div class="vazio">Nenhum encaminhamento com estes filtros.</div>';
+    document.querySelectorAll('#lista-enc [data-pror]').forEach(bt => bt.onclick = () => formProrrogar(D.enc.find(x=>x.id===bt.dataset.pror), null));
+    document.querySelectorAll('#lista-enc [data-eenc]').forEach(bt => bt.onclick = () => { const e = D.enc.find(x=>x.id===bt.dataset.eenc); formEnc(IX.reun.get(e.reuniao_id), e); });
     document.querySelectorAll('#lista-enc [data-conc]').forEach(bt => bt.onclick = async () => {
       const e = D.enc.find(x=>x.id===bt.dataset.conc); bt.disabled = true;
       try{ await alterar('matric_encaminhamentos', e.id, {concluido:!e.concluido}); await carregar(); desenhar(); aviso(e.concluido?'Reaberto.':'Concluído.'); }
@@ -1630,7 +1716,8 @@ function formAgente(g){
       <div class="chips">${D.ubs.map(u => `<label class="chip"><input type="checkbox" name="ubs" value="${u.id}" ${(g ? ubsDoAgente(g) : (F.aUbs&&F.aUbs!=='0'?[Number(F.aUbs)]:[])).includes(u.id)?'checked':''}><span>${esc(u.nome)}<small>${esc(u.sigla)}</small></span></label>`).join('')}</div></div>
     <div class="grade2">
       <label class="campo"><span>Equipe</span><input type="text" name="equipe" value="${esc(g?g.equipe:'')}" placeholder="Ex.: Azul"></label>
-      <label class="campo"><span>Microárea</span><input type="text" name="microarea" value="${esc(g?g.microarea:'')}" placeholder="Ex.: Azul 1"></label>
+      <label class="campo"><span>Microárea</span><input type="text" name="microarea" list="dl-micro-ag" value="${esc(g?g.microarea:'')}" placeholder="Escolha ou digite">
+        <datalist id="dl-micro-ag">${[...new Set(D.agentes.filter(x=>x.funcao==='ACS'&&x.microarea).map(x=>x.microarea))].sort().map(m=>`<option value="${esc(m)}">`).join('')}</datalist></label>
     </div>
     ${g?`<label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="ativo" ${g.ativo?'checked':''} style="width:auto"> Ativo (aparece para marcar presença)</label>`:''}`,
     async f => {
