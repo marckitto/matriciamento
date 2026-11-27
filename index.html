@@ -244,6 +244,21 @@ main > *{animation:entrar .22s ease-out both}
 .serie .meses.vals{color:var(--tinta);font-size:11px;font-weight:600;margin-top:2px}
 .serie .leg{font-size:11px;color:var(--mudo);display:flex;justify-content:space-between}
 
+@media (max-width:1180px){
+  table.t.pilha thead{display:none}
+  table.t.pilha, table.t.pilha tbody{display:block;width:100%}
+  table.t.pilha tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;padding:14px 18px;border-bottom:1px solid var(--linha2)}
+  table.t.pilha tr:last-child{border-bottom:0}
+  table.t.pilha td{display:block;border:0;padding:0;min-width:0!important}
+  table.t.pilha td::before{content:attr(data-label);display:block;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mudo);margin-bottom:3px}
+  table.t.pilha td[data-label=""]::before{display:none}
+  table.t.pilha td.longo{grid-column:1/-1;font-size:14px;line-height:1.5;order:1}
+  table.t.pilha td.acao{order:2}
+  table.t.pilha td.acao{grid-column:1/-1;text-align:left;display:flex;gap:8px;flex-wrap:wrap}
+  table.t.pilha td.acao::before{display:none}
+  table.t.pilha td.num{text-align:left}
+  table.t.pilha tr.clica:hover{background:#f3f8f6}
+}
 @media (max-width:900px){
   body{display:block}
   aside.lateral{position:sticky;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px}
@@ -257,6 +272,7 @@ main > *{animation:entrar .22s ease-out both}
   main{padding:20px 16px 40px}
 }
 @media (max-width:640px){
+  table.t.pilha tr{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 14px}
   main{padding:16px 14px 40px}
   h1{font-size:22px}
   .grade2,.grade3{grid-template-columns:1fr}
@@ -605,6 +621,25 @@ async function recarregar(msg){
 $('#b-sair').onclick = () => sair();
 $('#b-senha').onclick = () => trocarSenha();
 $('#b-atualizar').onclick = () => recarregar('Dados atualizados.');
+
+/* ================= Tabelas em fichas (tablet/celular) ================= */
+const COLUNAS_LONGAS = new Set(['Ponto','Encaminhamento anterior','O que foi feito','Descrição','Encaminhamento','Pactuação']);
+function rotularTabelas(raiz){
+  raiz.querySelectorAll('table.t').forEach(tb => {
+    const cab = [...tb.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    if(!cab.some(c => COLUNAS_LONGAS.has(c))) return;
+    tb.classList.add('pilha');
+    tb.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => {
+      const rot = cab[i] || '';
+      td.dataset.label = rot;
+      if(COLUNAS_LONGAS.has(rot) && td.textContent.trim().length >= 20) td.classList.add('longo');
+    }));
+  });
+}
+let rotuloPendente = false;
+new MutationObserver(() => { if(rotuloPendente) return; rotuloPendente = true;
+  requestAnimationFrame(() => { rotuloPendente = false; rotularTabelas(document.getElementById('app')); }); })
+  .observe(document.getElementById('app'), {childList:true, subtree:true});
 
 /* ================= Navegação ================= */
 const ICONES = {
