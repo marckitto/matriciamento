@@ -296,7 +296,7 @@ main > *{animation:entrar .22s ease-out both}
   <div class="marca"><b>Matriciamento<br>ACS × ACV</b><span>Controle de Vetores · Paulínia</span></div>
   <nav id="nav"></nav>
   <div class="usuario"><span id="u-email"></span><span class="perfil" id="u-perfil"></span>
-    <div class="bts"><button id="b-atualizar" title="Recarregar dados">Atualizar</button><button id="b-sair">Sair</button></div></div>
+    <div class="bts"><button id="b-atualizar" title="Recarregar dados">Atualizar</button><button id="b-senha" title="Trocar a minha senha">Senha</button><button id="b-sair">Sair</button></div></div>
 </aside>
 <main id="app"><div class="carregando">Carregando…</div></main>
 
@@ -447,7 +447,7 @@ async function carregar(){
     todos('matric_agenda','select=*&order=data')
   ]);
   Object.assign(D, {ubs:u, reunioes:r, pontos:p, atual:a, enc:e, agentes:g, pact:k, agenda:ag});
-  if(perfil && perfil.admin) D.acesso = await todos('matric_acesso','select=*&order=nome');
+  if(perfil && perfil.edita) D.acesso = await todos('matric_acesso','select=*&order=nome');
   indexar();
 }
 function indexar(){
@@ -516,11 +516,10 @@ function telaLogin(msg, modo='entrar'){
       ${modo!=='esqueci'?`<label class="campo"><span>Senha</span><input type="password" name="senha" required minlength="6" autocomplete="${modo==='criar'?'new-password':'current-password'}"></label>`:''}
       ${modo==='criar'?`<label class="campo"><span>Repita a senha</span><input type="password" name="senha2" required minlength="6" autocomplete="new-password"></label>`:''}
       <button class="btn prim" type="submit">${modo==='entrar'?'Entrar':modo==='criar'?'Criar acesso':'Enviar link de recuperação'}</button>
-      ${modo==='entrar'?'<p class="mudo" style="margin:0;font-size:12px">Quem já usa o painel de dengue entra com o mesmo e-mail e senha.</p>':''}
+      <p class="mudo" style="margin:0;font-size:12px">Use o e-mail e a senha recebidos da Divisão de Controle de Vetores. Quem já usa o painel de dengue entra com a mesma senha.</p>
     </form>
     <div class="alt">
-      ${modo!=='entrar'?'<button class="lnk" data-m="entrar">Voltar para entrar</button>':'<button class="lnk" data-m="criar">Primeiro acesso</button>'}
-      ${modo==='entrar'?'<button class="lnk" data-m="esqueci">Esqueci a senha</button>':''}
+      <span class="mudo" style="font-size:12px">Sem acesso ou esqueceu a senha? Fale com a Divisão de Controle de Vetores.</span>
     </div>
   </div>`;
   document.querySelectorAll('.alt [data-m]').forEach(b => b.onclick = () => telaLogin('', b.dataset.m));
@@ -548,11 +547,11 @@ function telaLogin(msg, modo='entrar'){
   };
 }
 async function trocarSenha(){
-  modal('Definir nova senha', `
-    <label class="campo"><span>Nova senha</span><input type="password" name="s1" minlength="6" required></label>
-    <label class="campo"><span>Repita a nova senha</span><input type="password" name="s2" minlength="6" required></label>`,
+  modal('Trocar a minha senha', `
+    <label class="campo"><span>Nova senha</span><input type="password" name="s1" minlength="8" required autocomplete="new-password"></label>
+    <label class="campo"><span>Repita a nova senha</span><input type="password" name="s2" minlength="8" required autocomplete="new-password"></label>`,
     async f => {
-      if(f.s1.value.length < 6) throw new Error('A senha precisa ter pelo menos 6 caracteres.');
+      if(f.s1.value.length < 8) throw new Error('A senha precisa ter pelo menos 8 caracteres.');
       if(f.s1.value !== f.s2.value) throw new Error('As senhas não conferem.');
       await tokenValido();
       await authReq('user', {password:f.s1.value}, 'PUT');
@@ -604,6 +603,7 @@ async function recarregar(msg){
   catch(e){ if(e.message!=='SESSAO') aviso(e.message, true); }
 }
 $('#b-sair').onclick = () => sair();
+$('#b-senha').onclick = () => trocarSenha();
 $('#b-atualizar').onclick = () => recarregar('Dados atualizados.');
 
 /* ================= Navegação ================= */
@@ -621,7 +621,7 @@ function render(){
   if(!perfil) return;
   const {pag, id} = rota();
   const links = [['painel','Painel'],['agenda','Agenda'],['reunioes','Reuniões'],['pontos','Pontos'],['encaminhamentos','Encaminhamentos'],['pactuacoes','Pactuações']];
-  if(perfil.admin) links.push(['admin','Administração']);
+  if(perfil.edita) links.push(['admin','Administração']);
   const ativo = {reuniao:'reunioes', ponto:'pontos'}[pag] || pag;
   const nVenc = D.enc.filter(vencido).length;
   $('#nav').innerHTML = links.map(([k,t]) => `<a href="#/${k}" class="${k===ativo?'ativo':''}">${ICONES[k]||''}<span>${t}</span>${k==='encaminhamentos'&&nVenc?`<span class="badge" title="encaminhamentos vencidos">${nVenc}</span>`:''}</a>`).join('');
@@ -1519,22 +1519,23 @@ function telaPactuacoes(){
 
 /* ================= Administração ================= */
 function telaAdmin(){
-  if(!perfil.admin){ location.hash = '#/painel'; return; }
+  if(!perfil.edita){ location.hash = '#/painel'; return; }
   $('#app').innerHTML = `
-    <div class="cab"><div><h1>Administração</h1><p class="mudo">Cadastro das UBS e de quem acessa as atas.</p></div></div>
-    <section class="bloco"><div class="tit"><div><h2>UBS</h2><p class="mudo">A sigla entra no código dos pontos e não pode ser alterada depois do primeiro ponto.</p></div>
+    <div class="cab"><div><h1>Administração</h1><p class="mudo">Quem acessa as atas, agentes${perfil.admin?' e UBS':''}.</p></div></div>
+    <section class="bloco ${perfil.admin?'':'oculto'}"><div class="tit"><div><h2>UBS</h2><p class="mudo">A sigla entra no código dos pontos e não pode ser alterada depois do primeiro ponto.</p></div>
       <button class="btn prim" id="b-nubs">+ UBS</button></div>
       <div class="corpo sem">${D.ubs.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>Sigla</th><th>Nome</th><th class="num">Reuniões</th><th class="num">Pontos</th><th>Ativa</th><th class="acao"></th></tr></thead>
       <tbody>${D.ubs.map(u=>`<tr><td class="cod">${esc(u.sigla)}</td><td>${esc(u.nome)}</td>
         <td class="num mono">${D.reunioes.filter(r=>r.ubs_id===u.id).length}</td><td class="num mono">${D.pontos.filter(p=>p.ubs_id===u.id).length}</td>
         <td>${u.ativa?'Sim':'<span class="mudo">Não</span>'}</td><td class="acao"><button class="btn mini" data-eubs="${u.id}">Editar</button></td></tr>`).join('')}</tbody></table></div>`
       :'<div class="vazio">Nenhuma UBS cadastrada.</div>'}</div></section>
-    <section class="bloco"><div class="tit"><div><h2>Acesso</h2><p class="mudo">Edição: conduz as reuniões e vê todas as UBS. Consulta: só vê as UBS marcadas para ela. Você, como administrador, sempre edita.</p></div>
+    <section class="bloco"><div class="tit"><div><h2>Acesso</h2><p class="mudo">Só quem tem Edição cadastra pessoas. Edição: conduz as reuniões e vê todas as UBS. Consulta: só vê as UBS marcadas para ela.</p></div>
       <div class="acoes"><button class="btn" id="b-colac">Colar lista</button><button class="btn prim" id="b-nac">+ Pessoa</button></div></div>
-      <div class="corpo sem">${D.acesso.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>E-mail</th><th>Nome</th><th>Função</th><th>Perfil</th><th>UBS que vê</th><th class="acao"></th></tr></thead>
+      <div class="corpo sem">${D.acesso.length?`<div class="tab-wrap"><table class="t"><thead><tr><th>E-mail</th><th>Nome</th><th>Função</th><th>Perfil</th><th>UBS que vê</th><th>Conta</th><th class="acao"></th></tr></thead>
       <tbody>${D.acesso.map(a=>`<tr><td class="mono">${esc(a.email)}</td><td>${esc(a.nome||'—')}</td><td>${esc(a.funcao||'—')}</td>
         <td>${a.edita?'<b>Edição</b>':'Consulta'}</td>
-        <td>${a.edita?'Todas':(a.ubs_ids||[]).length?esc(a.ubs_ids.map(ubsSigla).join(', ')):'<span class="venc">Nenhuma</span>'}</td><td class="acao"><button class="btn mini" data-eac="${esc(a.email)}">Editar</button></td></tr>`).join('')}</tbody></table></div>`
+        <td>${a.edita?'Todas':(a.ubs_ids||[]).length?esc(a.ubs_ids.map(ubsSigla).join(', ')):'<span class="venc">Nenhuma</span>'}</td>
+        <td class="sub">${a.conta_criada_aqui?'Criada aqui':'Login já existente'}</td><td class="acao"><button class="btn mini" data-eac="${esc(a.email)}">Editar</button></td></tr>`).join('')}</tbody></table></div>`
       :'<div class="vazio">Ninguém na lista ainda. Inclua os e-mails de ACS, ACV e supervisores.</div>'}</div></section>
     <section class="bloco"><div class="tit"><div><h2>Agentes</h2><p class="mudo">ACS, ACV e demais profissionais que aparecem para marcar presença nas reuniões.</p></div>
       <div class="acoes"><button class="btn" id="b-colar">Colar lista</button><button class="btn prim" id="b-nag">+ Agente</button></div></div>
@@ -1543,7 +1544,7 @@ function telaAdmin(){
         <label>Função<select id="fa-fun">${opts(FUNCOES, F.aFun||'', 'Todas')}</select></label>
         <label class="chk"><input type="checkbox" id="fa-in" ${F.aIn?'checked':''}> Mostrar inativos</label></div></div>
       <div class="corpo sem" id="lista-agentes"></div></section>
-    <p class="mudo" style="font-size:12px">Cada pessoa cria a própria senha em "Primeiro acesso", com o e-mail cadastrado aqui. Quem já usa o painel de dengue entra com a mesma senha.</p>`;
+    <p class="mudo" style="font-size:12px">Ao incluir uma pessoa, defina uma senha inicial e passe para ela; depois ela pode trocar em "Senha", no menu. Quem já usa o painel de dengue entra com a senha que já tem.</p>`;
   const desenharAg = () => {
     const lista = D.agentes.filter(g => (F.aIn || g.ativo) && (!F.aFun || g.funcao===F.aFun) &&
       (!F.aUbs || (F.aUbs==='0' ? !ubsDoAgente(g).length : atende(g, Number(F.aUbs)))))
@@ -1561,7 +1562,7 @@ function telaAdmin(){
   $('#b-nag').onclick = () => formAgente(null);
   $('#b-colar').onclick = colarAgentes;
   desenharAg();
-  $('#b-nubs').onclick = () => formUbs(null);
+  if(perfil.admin) $('#b-nubs').onclick = () => formUbs(null);
   $('#b-nac').onclick = () => formAcesso(null);
   document.querySelectorAll('[data-eubs]').forEach(b => b.onclick = () => formUbs(IX.ubs.get(Number(b.dataset.eubs))));
   $('#b-colac').onclick = colarAcessos;
@@ -1641,6 +1642,27 @@ function colarAgentes(){
   form.lista.oninput = () => { const {ok, erros} = lerLista(form.lista.value);
     form.querySelector('#prev-ag').innerHTML = `${ok.length} linha(s) prontas${erros.length?` · <span class="venc">${erros.length} com problema: ${esc(erros.slice(0,3).join(' · '))}</span>`:''}`; };
 }
+async function funcaoUsuarios(corpo){
+  const r = await fetch(SB_URL + '/functions/v1/matric-usuarios', {method:'POST',
+    headers:{apikey:SB_KEY, Authorization:'Bearer ' + await tokenValido(), 'Content-Type':'application/json'}, body:JSON.stringify(corpo)});
+  let j = null; try{ j = await r.json(); }catch(e){}
+  if(!r.ok || !j || !j.ok) throw new Error((j && j.erro) || ('Erro ' + r.status));
+  return j;
+}
+function senhaSugerida(){
+  const c = 'abcdefghjkmnpqrstuvwxyz23456789', a = new Uint32Array(10); crypto.getRandomValues(a);
+  return 'Pa' + [...a].slice(0,6).map(n => c[n % c.length]).join('') + String(10 + a[9] % 90) + '!';
+}
+function formSenhaDe(a){
+  modal('Definir nova senha', `
+    <div class="info">Nova senha para <b>${esc(a.email)}</b>. Passe a senha para a pessoa; ela pode trocar depois em "Senha", no menu.</div>
+    <label class="campo"><span>Nova senha *</span><input type="text" name="senha" required minlength="8" value="${esc(senhaSugerida())}" autocomplete="off"></label>`,
+    async f => {
+      if(f.senha.value.length < 8) throw new Error('A senha precisa ter pelo menos 8 caracteres.');
+      await funcaoUsuarios({acao:'senha', email:a.email, senha:f.senha.value});
+      aviso('Senha definida. Passe a nova senha para a pessoa.');
+    }, {rotulo:'Definir senha'});
+}
 function formAcesso(a){
   modal(a?'Editar acesso':'Incluir pessoa', `
     <label class="campo"><span>E-mail *</span><input type="email" name="email" required value="${esc(a?a.email:'')}" ${a?'disabled':''}></label>
@@ -1651,7 +1673,9 @@ function formAcesso(a){
     <label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="edita" ${a&&a.edita?'checked':''} style="width:auto"> Edição: registra e edita reuniões e vê todas as UBS</label>
     <div class="campo" id="campo-ubs"><span>UBS que pode ver (consulta) *</span>
       <div class="chips">${D.ubs.map(u => `<label class="chip"><input type="checkbox" name="ubs" value="${u.id}" ${a&&(a.ubs_ids||[]).includes(u.id)?'checked':''}><span>${esc(u.nome)}<small>${esc(u.sigla)}</small></span></label>`).join('')}</div></div>
-    ${a?'<button type="button" class="lnk" id="b-delac" style="justify-self:start;color:var(--vencido)">Remover acesso</button>':''}`,
+    ${a?'':`<label class="campo"><span>Senha inicial</span><input type="text" name="senha" value="${esc(senhaSugerida())}" autocomplete="off">
+      <small>Passe esta senha para a pessoa. Deixe em branco só se ela já tiver login do painel de dengue.</small></label>`}
+    ${a?`<div class="acoes">${a.conta_criada_aqui?'<button type="button" class="btn" id="b-senhaac">Definir nova senha</button>':''}<button type="button" class="lnk" id="b-delac" style="color:var(--vencido);margin-left:auto">Remover acesso</button></div>`:''}`,
     async f => {
       const sel = [...f.querySelectorAll('input[name=ubs]:checked')].map(x=>Number(x.value));
       if(!f.edita.checked && !sel.length) throw new Error('Marque ao menos uma UBS para o acesso de consulta.');
@@ -1660,13 +1684,19 @@ function formAcesso(a){
       else {
         const email = String(f.email.value).trim().toLowerCase();
         if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('E-mail inválido.');
-        await inserir('matric_acesso', {...linha, email});
+        const senha = String(f.senha.value||'').trim();
+        if(senha && senha.length < 8) throw new Error('A senha inicial precisa ter pelo menos 8 caracteres.');
+        const r = await funcaoUsuarios({acao:'criar', email, senha, ...linha});
+        await recarregar(r.conta_criada ? `Acesso criado. Passe a senha para ${email}.` : 'Acesso liberado para o login que a pessoa já usa.');
+        return;
       }
       await recarregar('Acesso salvo.');
     });
   const fm = document.querySelector('.fundo form'), cu = fm.querySelector('#campo-ubs');
   const mostrar = () => cu.style.display = fm.edita.checked ? 'none' : '';
   fm.edita.onchange = mostrar; mostrar();
+  const bs = $('#b-senhaac');
+  if(bs) bs.onclick = () => { document.querySelector('.fundo').remove(); formSenhaDe(a); };
   const bd = $('#b-delac');
   if(bd) bd.onclick = async () => {
     try{ await excluir('matric_acesso', a.email, 'email'); document.querySelector('.fundo').remove(); await recarregar('Acesso removido.'); }
@@ -1676,18 +1706,24 @@ function formAcesso(a){
 function colarAcessos(){
   const form = modal('Colar lista de acessos', `
     <div class="info">Uma pessoa por linha, separando com ponto e vírgula (ou colando colunas do Excel):<br>
-      <span class="mono">E-mail; Nome; Função; Siglas das UBS; Edita (S/N)</span><br>
+      <span class="mono">E-mail; Nome; Função; Siglas das UBS; Edita (S/N); Senha</span><br>
       Ex.: <span class="mono">ubscentro@gmail.com; UBS Centro; Enfermeiro(a) da UBS; CENTRO</span><br>
-      <span class="mono">fulano@gmail.com; Fulano; ACV; ; S</span> (edição vê todas as UBS)</div>
+      Sem senha na linha, o sistema gera uma. No fim aparece a lista de e-mails e senhas para você repassar.</div>
     <label class="campo"><span>Lista</span><textarea name="lista" rows="10" required></textarea></label>
     <div id="prev-ac" class="mudo" style="font-size:13px"></div>`,
     async f => {
       const {ok, erros} = ler(f.lista.value);
       if(erros.length) throw new Error(erros.slice(0,5).join(' · '));
       if(!ok.length) throw new Error('Nenhuma linha válida.');
-      await api('POST', 'matric_acesso?on_conflict=email', ok, 'resolution=merge-duplicates,return=minimal');
-      await recarregar(ok.length+' acesso(s) salvo(s).');
-    }, {rotulo:'Salvar acessos', largura:760});
+      const res = [];
+      for(const l of ok){
+        try{ const r = await funcaoUsuarios({acao:'criar', ...l}); res.push([l.email, r.conta_criada ? l.senha : '(usa o login que já tem)']); }
+        catch(e){ res.push([l.email, 'NÃO CRIADO: ' + e.message]); }
+      }
+      await recarregar();
+      modal('Acessos criados', `<p style="margin:0">Passe a cada pessoa o e-mail e a senha. Esta lista não fica salva: copie agora.</p>
+        <textarea rows="10" readonly class="mono" style="font-size:12px">${esc(res.map(r=>r.join(' ; ')).join('\n'))}</textarea>`, null);
+    }, {rotulo:'Criar acessos', largura:760});
   const ler = txt => {
     const ok = [], erros = [], sig = new Map(D.ubs.map(u=>[u.sigla.toUpperCase(), u.id])), fun = new Map(FUNCOES.map(x=>[x.toUpperCase(), x]));
     txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach((l,i) => {
@@ -1698,7 +1734,8 @@ function colarAcessos(){
       if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) erros.push(`linha ${i+1}: e-mail inválido`);
       else if(falta.length) erros.push(`linha ${i+1}: UBS "${falta.join(', ')}" não cadastrada`);
       else if(!edita && !ids.length) erros.push(`linha ${i+1}: consulta precisa de ao menos uma UBS`);
-      else ok.push({email, nome:c[1]||null, funcao:fun.get((c[2]||'').toUpperCase())||c[2]||null, edita, ubs_ids:edita?[]:ids});
+      else if(c[5] && c[5].length < 8) erros.push(`linha ${i+1}: senha com menos de 8 caracteres`);
+      else ok.push({email, nome:c[1]||null, funcao:fun.get((c[2]||'').toUpperCase())||c[2]||null, edita, ubs_ids:edita?[]:ids, senha:c[5]||senhaSugerida()});
     });
     return {ok, erros};
   };
