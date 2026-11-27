@@ -1,4 +1,4 @@
-# Matriciamento ACS × ACV
+# Matriciamento ACS e ACV
 
 Sistema web das reuniões de matriciamento entre Agentes Comunitários de Saúde (ACS) e Agentes de Controle de Vetor (ACV) — Divisão de Controle de Vetores, Vigilância em Saúde, Paulínia/SP.
 

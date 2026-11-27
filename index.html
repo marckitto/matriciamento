@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matriciamento ACS × ACV — Atas e Pendências</title>
+<title>Matriciamento ACS e ACV — Atas e Pendências</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0f2e2b">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -293,7 +293,7 @@ main > *{animation:entrar .22s ease-out both}
 </head>
 <body>
 <aside class="lateral oculto" id="topo">
-  <div class="marca"><b>Matriciamento<br>ACS × ACV</b><span>Controle de Vetores · Paulínia</span></div>
+  <div class="marca"><b>Matriciamento<br>ACS e ACV</b><span>Controle de Vetores · Paulínia</span></div>
   <nav id="nav"></nav>
   <div class="usuario"><span id="u-email"></span><span class="perfil" id="u-perfil"></span>
     <div class="bts"><button id="b-atualizar" title="Recarregar dados">Atualizar</button><button id="b-senha" title="Trocar a minha senha">Senha</button><button id="b-sair">Sair</button></div></div>
@@ -507,7 +507,7 @@ function telaLogin(msg, modo='entrar'){
   const titulos = {entrar:'Entrar', criar:'Primeiro acesso', esqueci:'Recuperar senha'};
   $('#app').innerHTML = `
   <div class="login">
-    <h1>Atas de Matriciamento ACS × ACV</h1>
+    <h1>Atas de Matriciamento ACS e ACV</h1>
     <p class="mudo" style="margin:4px 0 0">Vigilância em Saúde · Controle de Vetores · Paulínia</p>
     <form id="f-login">
       <h3>${titulos[modo]}</h3>
@@ -987,7 +987,7 @@ function telaReuniao(id){
   const thAcao = ed ? '<th class="acao"></th>' : '';
 
   $('#app').innerHTML = `
-    <div class="ata-cab"><b>Ata da Reunião de Matriciamento ACS × ACV</b>
+    <div class="ata-cab"><b>Ata da Reunião de Matriciamento ACS e ACV</b>
       <span>Prefeitura Municipal de Paulínia · Departamento de Vigilância em Saúde · Divisão de Controle de Vetores</span></div>
     <div class="cab"><div>
       <a href="#/reunioes" class="lnk nao-imprime">← Reuniões</a>
@@ -1434,7 +1434,7 @@ function exportarICS(){
 
 /* ================= Pactuações ================= */
 const SIT_PACT = ['Vigente','Em revisão','Encerrada'];
-const TEMAS_PACT = ['Fluxo de comunicação ACS × ACV','Visitas conjuntas','Imóveis fechados e recusas','Acumuladores','Pontos estratégicos','Bloqueio de casos','Mutirões e ações de limpeza','Educação em saúde','Outro'];
+const TEMAS_PACT = ['Fluxo de comunicação ACS e ACV','Visitas conjuntas','Imóveis fechados e recusas','Acumuladores','Pontos estratégicos','Bloqueio de casos','Mutirões e ações de limpeza','Educação em saúde','Outro'];
 function sitPact(sx){ const c = {'Vigente':'resolvido','Em revisão':'aguardando','Encerrada':'encerrado'}[sx]||'encerrado'; return `<span class="sit sit-${c}">${esc(sx)}</span>`; }
 const revisaoVencida = k => k.situacao!=='Encerrada' && k.revisar_em && k.revisar_em < hoje();
 function tabelaPact(lista, ed, mostrarUbs){
@@ -1490,7 +1490,7 @@ function telaPactuacoes(){
   $('#app').innerHTML = `
     <div class="cab"><div><h1>Pactuações</h1><p class="mudo">Combinados firmados entre ACS e ACV, por UBS ou para todas as UBS.</p></div>
       <div class="acoes"><button class="btn" id="b-imp">Imprimir</button>${perfil.edita?'<button class="btn prim" id="b-npact">+ Pactuação</button>':''}</div></div>
-    <div class="ata-cab"><b>Pactuações do Matriciamento ACS × ACV</b><span>Prefeitura Municipal de Paulínia · Vigilância em Saúde · Divisão de Controle de Vetores · ${fmt(hoje())}</span></div>
+    <div class="ata-cab"><b>Pactuações do Matriciamento ACS e ACV</b><span>Prefeitura Municipal de Paulínia · Vigilância em Saúde · Divisão de Controle de Vetores · ${fmt(hoje())}</span></div>
     <div class="filtros nao-imprime">
       <label>UBS<select id="fk-ubs">${opts([{v:'0',t:'Só as de todas as UBS'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), F.kUbs, 'Todas')}</select></label>
       <label>Situação<select id="fk-sit">${opts(sitOpts, F.kSit)}</select></label>
