@@ -293,7 +293,7 @@ main > *{animation:entrar .22s ease-out both}
 </head>
 <body>
 <aside class="lateral oculto" id="topo">
-  <div class="marca"><b>Matriciamento<br>ACS e ACV</b><span>Controle de Vetores · Paulínia</span></div>
+  <div class="marca"><b>Matriciamento<br>ACS e ACV</b></div>
   <nav id="nav"></nav>
   <div class="usuario"><span id="u-email"></span><span class="perfil" id="u-perfil"></span>
     <div class="bts"><button id="b-atualizar" title="Recarregar dados">Atualizar</button><button id="b-senha" title="Trocar a minha senha">Senha</button><button id="b-sair">Sair</button></div></div>
@@ -508,7 +508,7 @@ function telaLogin(msg, modo='entrar'){
   $('#app').innerHTML = `
   <div class="login">
     <h1>Atas de Matriciamento ACS e ACV</h1>
-    <p class="mudo" style="margin:4px 0 0">Vigilância em Saúde · Controle de Vetores · Paulínia</p>
+    <p class="mudo" style="margin:4px 0 0">Atas, pendências e agenda das reuniões</p>
     <form id="f-login">
       <h3>${titulos[modo]}</h3>
       ${msg?`<div class="${/enviad|criada|confirm/i.test(msg)&&!/não/i.test(msg)?'info':'erro'}">${esc(msg)}</div>`:''}
@@ -516,10 +516,10 @@ function telaLogin(msg, modo='entrar'){
       ${modo!=='esqueci'?`<label class="campo"><span>Senha</span><input type="password" name="senha" required minlength="6" autocomplete="${modo==='criar'?'new-password':'current-password'}"></label>`:''}
       ${modo==='criar'?`<label class="campo"><span>Repita a senha</span><input type="password" name="senha2" required minlength="6" autocomplete="new-password"></label>`:''}
       <button class="btn prim" type="submit">${modo==='entrar'?'Entrar':modo==='criar'?'Criar acesso':'Enviar link de recuperação'}</button>
-      <p class="mudo" style="margin:0;font-size:12px">Use o e-mail e a senha recebidos da Divisão de Controle de Vetores. Quem já usa o painel de dengue entra com a mesma senha.</p>
+      <p class="mudo" style="margin:0;font-size:12px">Use o e-mail e a senha que você recebeu. Quem já usa o painel de dengue entra com a mesma senha.</p>
     </form>
     <div class="alt">
-      <span class="mudo" style="font-size:12px">Sem acesso ou esqueceu a senha? Fale com a Divisão de Controle de Vetores.</span>
+      <span class="mudo" style="font-size:12px">Sem acesso ou esqueceu a senha? Fale com a coordenação do matriciamento.</span>
     </div>
   </div>`;
   document.querySelectorAll('.alt [data-m]').forEach(b => b.onclick = () => telaLogin('', b.dataset.m));
@@ -578,7 +578,7 @@ async function iniciar(){
       $('#topo').classList.add('oculto');
       $('#app').innerHTML = `<div class="login"><h1>Acesso ainda não liberado</h1>
         <p>Você entrou como <b>${esc(sessao.email)}</b>, mas este e-mail ainda não está na lista de acesso das atas de matriciamento.</p>
-        <p class="mudo">Peça ao administrador da Divisão de Controle de Vetores para incluir seu e-mail. Depois, toque em "Tentar de novo".</p>
+        <p class="mudo">Peça à coordenação do matriciamento para incluir seu e-mail. Depois, toque em "Tentar de novo".</p>
         <div class="acoes"><button class="btn prim" id="b-tentar">Tentar de novo</button><button class="btn" id="b-sair2">Sair</button></div></div>`;
       $('#b-tentar').onclick = iniciar; $('#b-sair2').onclick = () => sair();
       return;
@@ -988,7 +988,7 @@ function telaReuniao(id){
 
   $('#app').innerHTML = `
     <div class="ata-cab"><b>Ata da Reunião de Matriciamento ACS e ACV</b>
-      <span>Prefeitura Municipal de Paulínia · Departamento de Vigilância em Saúde · Divisão de Controle de Vetores</span></div>
+      <span>Prefeitura Municipal de Paulínia · Departamento de Vigilância em Saúde</span></div>
     <div class="cab"><div>
       <a href="#/reunioes" class="lnk nao-imprime">← Reuniões</a>
       <h1>${esc(ubsSigla(R.ubs_id))} — ${esc(ubsNome(R.ubs_id))}</h1>
@@ -1490,7 +1490,7 @@ function telaPactuacoes(){
   $('#app').innerHTML = `
     <div class="cab"><div><h1>Pactuações</h1><p class="mudo">Combinados firmados entre ACS e ACV, por UBS ou para todas as UBS.</p></div>
       <div class="acoes"><button class="btn" id="b-imp">Imprimir</button>${perfil.edita?'<button class="btn prim" id="b-npact">+ Pactuação</button>':''}</div></div>
-    <div class="ata-cab"><b>Pactuações do Matriciamento ACS e ACV</b><span>Prefeitura Municipal de Paulínia · Vigilância em Saúde · Divisão de Controle de Vetores · ${fmt(hoje())}</span></div>
+    <div class="ata-cab"><b>Pactuações do Matriciamento ACS e ACV</b><span>Prefeitura Municipal de Paulínia · Departamento de Vigilância em Saúde · ${fmt(hoje())}</span></div>
     <div class="filtros nao-imprime">
       <label>UBS<select id="fk-ubs">${opts([{v:'0',t:'Só as de todas as UBS'}].concat(D.ubs.map(u=>({v:u.id,t:`${u.sigla} — ${u.nome}`}))), F.kUbs, 'Todas')}</select></label>
       <label>Situação<select id="fk-sit">${opts(sitOpts, F.kSit)}</select></label>
