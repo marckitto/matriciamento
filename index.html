@@ -1656,6 +1656,7 @@ function senhaSugerida(){
 function formSenhaDe(a){
   modal('Definir nova senha', `
     <div class="info">Nova senha para <b>${esc(a.email)}</b>. Passe a senha para a pessoa; ela pode trocar depois em "Senha", no menu.</div>
+    ${a.conta_criada_aqui?'':'<div class="erro" style="background:var(--aberto-bg);color:var(--aberto)">Este login já existia antes das atas. A nova senha também passa a valer no painel de dengue e nos outros sistemas que usam este login.</div>'}
     <label class="campo"><span>Nova senha *</span><input type="text" name="senha" required minlength="8" value="${esc(senhaSugerida())}" autocomplete="off"></label>`,
     async f => {
       if(f.senha.value.length < 8) throw new Error('A senha precisa ter pelo menos 8 caracteres.');
@@ -1673,9 +1674,10 @@ function formAcesso(a){
     <label class="campo" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="edita" ${a&&a.edita?'checked':''} style="width:auto"> Edição: registra e edita reuniões e vê todas as UBS</label>
     <div class="campo" id="campo-ubs"><span>UBS que pode ver (consulta) *</span>
       <div class="chips">${D.ubs.map(u => `<label class="chip"><input type="checkbox" name="ubs" value="${u.id}" ${a&&(a.ubs_ids||[]).includes(u.id)?'checked':''}><span>${esc(u.nome)}<small>${esc(u.sigla)}</small></span></label>`).join('')}</div></div>
-    ${a?'':`<label class="campo"><span>Senha inicial</span><input type="text" name="senha" value="${esc(senhaSugerida())}" autocomplete="off">
-      <small>Passe esta senha para a pessoa. Deixe em branco só se ela já tiver login do painel de dengue.</small></label>`}
-    ${a?`<div class="acoes">${a.conta_criada_aqui?'<button type="button" class="btn" id="b-senhaac">Definir nova senha</button>':''}<button type="button" class="lnk" id="b-delac" style="color:var(--vencido);margin-left:auto">Remover acesso</button></div>`:''}`,
+    ${a?'':`<div id="aviso-login" class="info oculto"></div>
+      <label class="campo" id="campo-senha"><span>Senha inicial</span><input type="text" name="senha" value="${esc(senhaSugerida())}" autocomplete="off">
+      <small>Passe esta senha para a pessoa junto com o link do sistema.</small></label>`}
+    ${a?`<div class="acoes">${a.conta_criada_aqui||perfil.admin?'<button type="button" class="btn" id="b-senhaac">Definir nova senha</button>':''}<button type="button" class="lnk" id="b-delac" style="color:var(--vencido);margin-left:auto">Remover acesso</button></div>`:''}`,
     async f => {
       const sel = [...f.querySelectorAll('input[name=ubs]:checked')].map(x=>Number(x.value));
       if(!f.edita.checked && !sel.length) throw new Error('Marque ao menos uma UBS para o acesso de consulta.');
@@ -1686,13 +1688,30 @@ function formAcesso(a){
         if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('E-mail inválido.');
         const senha = String(f.senha.value||'').trim();
         if(senha && senha.length < 8) throw new Error('A senha inicial precisa ter pelo menos 8 caracteres.');
-        const r = await funcaoUsuarios({acao:'criar', email, senha, ...linha});
-        await recarregar(r.conta_criada ? `Acesso criado. Passe a senha para ${email}.` : 'Acesso liberado para o login que a pessoa já usa.');
+        const r = await funcaoUsuarios({acao:'criar', email, senha: f.dataset.temLogin==='1' ? '' : senha, ...linha});
+        await recarregar();
+        setTimeout(() => modal('Acesso liberado', r.conta_criada
+          ? `<p style="margin:0">Passe para a pessoa o link do sistema e:</p><div class="info mono">E-mail: ${esc(email)}<br>Senha: ${esc(senha)}</div><p class="mudo" style="margin:0;font-size:13px">Ela pode trocar a senha depois, no botão "Senha" do menu.</p>`
+          : `<p style="margin:0"><b>${esc(email)}</b> já tinha login (por exemplo, do painel de dengue).</p><div class="info">A pessoa entra com a <b>senha que já usa</b> nesse login. Nenhuma senha nova foi criada.</div>`, null), 50);
         return;
       }
       await recarregar('Acesso salvo.');
     });
   const fm = document.querySelector('.fundo form'), cu = fm.querySelector('#campo-ubs');
+  if(!a){
+    const verificar = async () => {
+      const email = String(fm.email.value).trim().toLowerCase(), av = fm.querySelector('#aviso-login'), cs = fm.querySelector('#campo-senha');
+      fm.dataset.temLogin = '0'; av.classList.add('oculto'); cs.classList.remove('oculto');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
+      try{
+        const r = await funcaoUsuarios({acao:'verificar', email});
+        if(r.ja_na_lista){ av.innerHTML = 'Este e-mail já está na lista de acesso. Para mudar a UBS ou o perfil, use "Editar" na lista.'; av.classList.remove('oculto'); }
+        else if(r.tem_login){ fm.dataset.temLogin = '1'; cs.classList.add('oculto');
+          av.innerHTML = '<b>Este e-mail já tem login</b> (por exemplo, do painel de dengue). A pessoa vai entrar com a senha que já usa; nenhuma senha nova será criada.'; av.classList.remove('oculto'); }
+      }catch(e){}
+    };
+    fm.email.addEventListener('change', verificar);
+  }
   const mostrar = () => cu.style.display = fm.edita.checked ? 'none' : '';
   fm.edita.onchange = mostrar; mostrar();
   const bs = $('#b-senhaac');
